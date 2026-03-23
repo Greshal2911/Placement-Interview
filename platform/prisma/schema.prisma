@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+  engine = "prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== USER MODELS ====================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String?  // Optional if using OAuth
+  role      String   @default("student") // student, admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  progress       Progress[]
+  interviews     Interview[]
+  userAnswers    UserAnswer[]
+  moduleProgress ModuleProgress[]
+
+  @@index([email])
+}
+
+// ==================== LEARNING STRUCTURE ====================
+
+model Module {
+  id          String   @id @default(cuid())
+  title       String   @unique
+  description String
+  order       Int      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  concepts  Concept[]
+  questions Question[]
+  progress  ModuleProgress[]
+  interviews Interview[]
+
+  @@index([order])
+}
+
+model Concept {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  content     String?  // Detailed explanation/notes
+  order       Int
+  moduleId    String
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([moduleId])
+}
+
+// ==================== QUESTIONS & CHALLENGES ====================
+
+model Question {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        QuestionType
+  moduleId    String
+  module      Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  difficulty  String  @default("Medium") // Easy, Medium, Hard
+  order       Int?
+
+  // MCQ specific
+  mcqOptions  MCQOption[]
+
+  // Code challenge specific
+  codeChallenge CodeChallenge?
+
+  // User responses
+  userAnswers UserAnswer[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([moduleId])
+  @@index([type])
+}
+
+enum QuestionType {
+  MCQ
+  CODE
+}
+
+model MCQOption {
+  id         String   @id @default(cuid())
+  text       String
+  isCorrect  Boolean
+  order      Int
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+model CodeChallenge {
+  id         String   @id @default(cuid())
+  title      String
+  language   String   @default("cpp") // cpp, c, python
+  boilerplate String? // Initial code
+  testCases  Json     // [{ input: string, output: string, visible: boolean }]
+  questionId String   @unique
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model UserAnswer {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId String
+  question  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  // For MCQ
+  selectedOption String?
+  
+  // For Code
+  code      String?
+  output    String?
+  
+  isCorrect Boolean
+  score     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, questionId])
+  @@index([userId])
+}
+
+// ==================== PROGRESS TRACKING ====================
+
+model ModuleProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId  String
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  completed Boolean  @default(false)
+  completedAt DateTime?
+  score     Int      @default(0)
+  questionsAttempted Int @default(0)
+  questionsCorrect   Int @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, moduleId])
+  @@index([userId])
+  @@index([moduleId])
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  totalQuestionsAttempted Int @default(0)
+  totalCorrect            Int @default(0)
+  overallScore            Int @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId])
+  @@index([userId])
+}
+
+// ==================== INTERVIEW SYSTEM ====================
+
+model Interview {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId  String
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  status    InterviewStatus @default(PENDING) // PENDING, IN_PROGRESS, COMPLETED
+  score     Int?
+  feedback  String?
+  startedAt DateTime?
+  completedAt DateTime?
+  
+  // Interview Q&A stored as JSON
+  // [{ question: string, userResponse: string, geminiEvaluation: string, score: int }]
+  qnaLog    Json     @default("[]")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([moduleId])
+  @@index([status])
+}
+
+enum InterviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+

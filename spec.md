@@ -1,0 +1,3 @@
+
+we are third year enginnering students so we have to build a project based on web technology and data sciience and big data analaytics so we have a idea to build a placement prepration and we have decided to include oops and  c++ concepts for interview prepthat will include code + mcq Questions similar to leetcode platform
+we have also decided to divide the concepts into modules and after each completion of the module students will have to face Ai interview which we have predefined question set and will also ask Questions based on the students response we will use gemini api.nodejs,typescript,react and prisma orm ,postgressSQl. Use tailwind css and shadcn.
