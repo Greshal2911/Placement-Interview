@@ -1,6 +1,20 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import type { PoolConfig } from "@neondatabase/serverless";
 
-const prisma = new PrismaClient();
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL must be provided");
+}
+
+const poolConfig: PoolConfig = { connectionString: databaseUrl };
+
+const prisma = new PrismaClient({
+  log: ["error", "info"],
+  adapter: new PrismaNeon(poolConfig),
+});
 
 async function main() {
   console.log("🌱 Starting database seed...");
@@ -8,7 +22,7 @@ async function main() {
   // Clear existing data
   await prisma.userAnswer.deleteMany();
   await prisma.codeChallenge.deleteMany();
-  await prisma.mcqOption.deleteMany();
+  await prisma.mCQOption.deleteMany();
   await prisma.question.deleteMany();
   await prisma.interview.deleteMany();
   await prisma.moduleProgress.deleteMany();
@@ -23,7 +37,8 @@ async function main() {
   const module1 = await prisma.module.create({
     data: {
       title: "OOPs Fundamentals",
-      description: "Learn Object-Oriented Programming basics including classes, objects, and principles",
+      description:
+        "Learn Object-Oriented Programming basics including classes, objects, and principles",
       order: 1,
     },
   });
@@ -31,7 +46,8 @@ async function main() {
   const module2 = await prisma.module.create({
     data: {
       title: "C++ Basics",
-      description: "Master C++ fundamentals including syntax, data types, and control flow",
+      description:
+        "Master C++ fundamentals including syntax, data types, and control flow",
       order: 2,
     },
   });
@@ -39,7 +55,8 @@ async function main() {
   const module3 = await prisma.module.create({
     data: {
       title: "Advanced OOPs",
-      description: "Deep dive into inheritance, polymorphism, interfaces, and design patterns",
+      description:
+        "Deep dive into inheritance, polymorphism, interfaces, and design patterns",
       order: 3,
     },
   });
@@ -48,7 +65,10 @@ async function main() {
 
   // Create Concepts for OOPs Fundamentals
   const oopsConepts = [
-    { title: "Classes and Objects", description: "Understanding blueprint and instances" },
+    {
+      title: "Classes and Objects",
+      description: "Understanding blueprint and instances",
+    },
     { title: "Encapsulation", description: "Data hiding and access control" },
     { title: "Abstraction", description: "Hiding implementation details" },
   ];
@@ -67,9 +87,18 @@ async function main() {
 
   // Create Concepts for C++ Basics
   const cppConcepts = [
-    { title: "Variables and Data Types", description: "Learn about int, float, char, etc." },
-    { title: "Loops and Conditionals", description: "for, while, if-else statements" },
-    { title: "Functions", description: "Function declaration, definition, and calls" },
+    {
+      title: "Variables and Data Types",
+      description: "Learn about int, float, char, etc.",
+    },
+    {
+      title: "Loops and Conditionals",
+      description: "for, while, if-else statements",
+    },
+    {
+      title: "Functions",
+      description: "Function declaration, definition, and calls",
+    },
   ];
 
   for (let i = 0; i < cppConcepts.length; i++) {
@@ -97,7 +126,11 @@ async function main() {
       order: 1,
       mcqOptions: {
         create: [
-          { text: "A blueprint for creating objects", isCorrect: true, order: 1 },
+          {
+            text: "A blueprint for creating objects",
+            isCorrect: true,
+            order: 1,
+          },
           { text: "An instance of an object", isCorrect: false, order: 2 },
           { text: "A function in programming", isCorrect: false, order: 3 },
           { text: "A module", isCorrect: false, order: 4 },
@@ -117,7 +150,11 @@ async function main() {
       order: 2,
       mcqOptions: {
         create: [
-          { text: "Hiding internal implementation details", isCorrect: true, order: 1 },
+          {
+            text: "Hiding internal implementation details",
+            isCorrect: true,
+            order: 1,
+          },
           { text: "Deleting unnecessary code", isCorrect: false, order: 2 },
           { text: "Writing comments", isCorrect: false, order: 3 },
           { text: "Using loops", isCorrect: false, order: 4 },
