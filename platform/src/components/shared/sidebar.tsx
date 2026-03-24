@@ -60,47 +60,47 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden xl:flex flex-col w-72 bg-linear-to-b from-slate-900 to-slate-950 text-white h-screen sticky top-0 border-r border-slate-800 shadow-lg">
-      <div className="px-6 py-5 border-b border-slate-800">
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+    <aside className="hidden xl:flex flex-col w-72 bg-gradient-to-b from-card to-[#14192f] h-screen sticky top-0 border-r border-border shadow-lg">
+      <div className="px-6 py-5 border-b border-border">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
           Quick Prep
         </p>
-        <h2 className="text-2xl font-semibold mt-1">Placement Lab</h2>
-        <p className="text-sm text-slate-300 mt-1">OOPs · C++ · Interviews</p>
+        <h2 className="text-2xl font-semibold mt-1 text-foreground">Placement Lab</h2>
+        <p className="text-sm text-muted-foreground mt-1">OOPs · C++ · Interviews</p>
       </div>
 
       <div className="px-6 py-5 space-y-2">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-slate-400 uppercase">Progress</p>
-          <span className="text-xs text-emerald-300">Streak 7d</span>
+          <p className="text-xs text-muted-foreground uppercase">Progress</p>
+          <span className="text-xs text-emerald-400">Streak 7d</span>
         </div>
-        <div className="relative h-2 rounded-full bg-slate-800">
+        <div className="relative h-2 rounded-full bg-muted">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-emerald-400"
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"
             style={{ width: "62%" }}
           />
         </div>
-        <p className="text-xs text-slate-400">Module completion 62%</p>
+        <p className="text-xs text-muted-foreground">Module completion 62%</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
         <section>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs text-slate-400 uppercase">Navigation</p>
-            <Sparkles className="w-4 h-4 text-emerald-300" />
+            <p className="text-xs text-muted-foreground uppercase">Navigation</p>
+            <Sparkles className="w-4 h-4 text-primary" />
           </div>
           <div className="space-y-2">{mainNav.map(renderNavItem)}</div>
         </section>
 
         <section className="pt-3">
-          <p className="text-xs text-slate-400 uppercase mb-2">Extras</p>
+          <p className="text-xs text-muted-foreground uppercase mb-2">Extras</p>
           <div className="space-y-2">{secondaryNav.map(renderNavItem)}</div>
         </section>
       </div>
 
-      <div className="border-t border-slate-800 px-6 py-5 space-y-3">
-        <p className="text-xs text-slate-400 uppercase">Need a push?</p>
-        <p className="text-sm text-slate-100 leading-tight">
+      <div className="border-t border-border px-6 py-5 space-y-3">
+        <p className="text-xs text-muted-foreground uppercase">Need a push?</p>
+        <p className="text-sm text-foreground leading-tight">
           Reserve a slot with Gemini Coach to rehearse interviews and get
           instant feedback.
         </p>
@@ -108,7 +108,7 @@ export function Sidebar() {
           <Button
             variant="default"
             size="sm"
-            className="w-full rounded-full bg-emerald-500 text-slate-900 hover:bg-emerald-400"
+            className="w-full rounded-full"
           >
             <span className="flex items-center justify-center gap-2 font-semibold">
               <Zap className="w-4 h-4" />
@@ -119,7 +119,7 @@ export function Sidebar() {
         <Button
           variant="outline"
           size="sm"
-          className="w-full justify-start gap-2 rounded-full text-slate-300 border-slate-700"
+          className="w-full justify-start gap-2 rounded-full"
         >
           <Settings className="w-4 h-4" />
           Settings

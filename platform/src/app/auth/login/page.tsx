@@ -53,13 +53,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-[#1a2a4a] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-8 h-8 text-blue-600" />
-            <span className="text-2xl font-bold text-slate-900">
+            <BookOpen className="w-8 h-8 text-primary" />
+            <span className="text-2xl font-bold text-foreground">
               PlacementPrep
             </span>
           </div>
@@ -68,17 +68,17 @@ export default function LoginPage() {
         {/* Card */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-foreground">Welcome Back</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Sign in to continue your learning journey
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Error Alert */}
             {apiError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800">{apiError}</p>
+              <div className="bg-destructive/15 border border-destructive/30 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive/90">{apiError}</p>
               </div>
             )}
 
@@ -86,7 +86,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-slate-900 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Email
                 </label>
                 <Input
@@ -94,17 +94,17 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className={errors.email ? "border-red-500" : ""}
+                  className={errors.email ? "border-destructive" : ""}
                   disabled={loading}
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.email}</p>
                 )}
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-slate-900 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Password
                 </label>
                 <div className="flex gap-2">
@@ -113,7 +113,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className={errors.password ? "border-red-500" : ""}
+                    className={errors.password ? "border-destructive" : ""}
                     disabled={loading}
                   />
                   <Button
@@ -126,7 +126,7 @@ export default function LoginPage() {
                   </Button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.password}</p>
                 )}
               </div>
 
@@ -151,10 +151,10 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-300" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-600">
+                <span className="px-2 bg-card text-muted-foreground">
                   Don't have an account?
                 </span>
               </div>
@@ -168,16 +168,16 @@ export default function LoginPage() {
         </Card>
 
         {/* Demo Link */}
-        <p className="text-center text-sm text-slate-600 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           Demo credentials:
           <br />
           Email:{" "}
-          <code className="bg-slate-100 px-2 py-1 rounded">
+          <code className="bg-muted px-2 py-1 rounded text-foreground">
             test@example.com
           </code>
           <br />
           Password:{" "}
-          <code className="bg-slate-100 px-2 py-1 rounded">
+          <code className="bg-muted px-2 py-1 rounded text-foreground">
             testPassword123
           </code>
         </p>

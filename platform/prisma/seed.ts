@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import type { PoolConfig } from "@neondatabase/serverless";
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -9,11 +8,9 @@ if (!databaseUrl) {
   throw new Error("DATABASE_URL must be provided");
 }
 
-const poolConfig: PoolConfig = { connectionString: databaseUrl };
-
 const prisma = new PrismaClient({
   log: ["error", "info"],
-  adapter: new PrismaNeon(poolConfig),
+  adapter: new PrismaNeon({ connectionString: databaseUrl }),
 });
 
 async function main() {

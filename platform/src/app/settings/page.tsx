@@ -68,7 +68,7 @@ export default function SettingsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex-1 flex flex-col">
           <Navbar />
@@ -76,34 +76,34 @@ export default function SettingsPage() {
             <div className="max-w-2xl mx-auto p-4 md:p-8 space-y-6">
               {/* Settings Header */}
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
-                <p className="text-slate-600 mt-2">Manage your preferences and account settings</p>
+                <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+                <p className="text-muted-foreground mt-2">Manage your preferences and account settings</p>
               </div>
 
               {/* General Settings */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Preferences</CardTitle>
-                  <CardDescription>Customize your experience</CardDescription>
+                  <CardTitle className="text-foreground">Preferences</CardTitle>
+                  <CardDescription className="text-muted-foreground">Customize your experience</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {settings.map((setting) => (
-                    <div key={setting.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                    <div key={setting.id} className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-muted transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="text-slate-600">{setting.icon}</div>
+                        <div className="text-muted-foreground">{setting.icon}</div>
                         <div>
-                          <p className="font-medium text-slate-900">{setting.label}</p>
-                          <p className="text-sm text-slate-600">{setting.description}</p>
+                          <p className="font-medium text-foreground">{setting.label}</p>
+                          <p className="text-sm text-muted-foreground">{setting.description}</p>
                         </div>
                       </div>
                       <button
                         onClick={() => toggleSetting(setting.id)}
                         className={`w-12 h-6 rounded-full transition-colors ${
-                          setting.enabled ? "bg-blue-600" : "bg-slate-300"
+                          setting.enabled ? "bg-primary" : "bg-muted"
                         } flex items-center padding-1`}
                       >
                         <div
-                          className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                          className={`w-5 h-5 bg-foreground rounded-full transition-transform ${
                             setting.enabled ? "translate-x-6" : "translate-x-0.5"
                           }`}
                         />
@@ -116,12 +116,12 @@ export default function SettingsPage() {
               {/* Learning Settings */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Learning Settings</CardTitle>
-                  <CardDescription>Configure your learning experience</CardDescription>
+                  <CardTitle className="text-foreground">Learning Settings</CardTitle>
+                  <CardDescription className="text-muted-foreground">Configure your learning experience</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-900">
+                    <label className="block text-sm font-medium text-foreground">
                       Difficulty Level
                     </label>
                     <div className="flex gap-2">
@@ -138,7 +138,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-900">
+                    <label className="block text-sm font-medium text-foreground">
                       Questions Per Session
                     </label>
                     <div className="flex gap-2">
@@ -159,11 +159,11 @@ export default function SettingsPage() {
               {/* Privacy & Security */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-foreground">
                     <Lock className="w-5 h-5" />
                     Privacy & Security
                   </CardTitle>
-                  <CardDescription>Manage your security settings</CardDescription>
+                  <CardDescription className="text-muted-foreground">Manage your security settings</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button variant="outline" className="w-full justify-start">
@@ -179,10 +179,10 @@ export default function SettingsPage() {
               </Card>
 
               {/* Danger Zone */}
-              <Card className="border-red-200 bg-red-50">
+              <Card className="border-destructive/30 bg-destructive/10">
                 <CardHeader>
-                  <CardTitle className="text-red-900">Danger Zone</CardTitle>
-                  <CardDescription className="text-red-700">
+                  <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                  <CardDescription className="text-destructive/70">
                     Irreversible actions
                   </CardDescription>
                 </CardHeader>
@@ -193,7 +193,7 @@ export default function SettingsPage() {
                   <Button
                     variant="outline"
                     onClick={logout}
-                    className="w-full border-red-300 text-red-600 hover:bg-red-100"
+                    className="w-full border-destructive/30 text-destructive hover:bg-destructive/10"
                   >
                     Logout from All Devices
                   </Button>
@@ -201,10 +201,10 @@ export default function SettingsPage() {
               </Card>
 
               {/* Footer */}
-              <Card className="bg-blue-50 border-blue-200">
+              <Card className="bg-primary/10 border-primary/20">
                 <CardContent className="pt-6">
-                  <p className="text-sm text-slate-600">
-                    <strong>Version:</strong> 1.0.0 • <strong>Last updated:</strong> {new Date().toLocaleDateString()}
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">Version:</strong> 1.0.0 • <strong className="text-foreground">Last updated:</strong> {new Date().toLocaleDateString()}
                   </p>
                 </CardContent>
               </Card>

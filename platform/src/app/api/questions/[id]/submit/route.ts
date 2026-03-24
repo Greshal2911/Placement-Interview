@@ -1,6 +1,21 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { CodeTestCase, evaluateCodeWithJudge0 } from "@/lib/judge0";
+
+function isCodeTestCaseArray(value: unknown): value is CodeTestCase[] {
+  if (!Array.isArray(value)) return false;
+
+  return value.every(
+    (item) =>
+      typeof item === "object" &&
+      item !== null &&
+      "input" in item &&
+      "output" in item &&
+      typeof item.input === "string" &&
+      typeof item.output === "string",
+  );
+}
 
 export async function POST(
   request: NextRequest,
@@ -30,6 +45,25 @@ export async function POST(
 
     let isCorrect = false;
     let score = 0;
+    let codeExecutionResult:
+      | {
+          passedCount: number;
+          totalCount: number;
+          testResults: Array<{
+            input: string;
+            expectedOutput: string;
+            actualOutput: string;
+            passed: boolean;
+            status: { id: number; description: string };
+            stderr?: string;
+            compileOutput?: string;
+            runtimeError?: string;
+            time?: string;
+            memory?: number;
+          }>;
+        }
+      | undefined;
+    let evaluatedOutput: string | null = null;
 
     // Validate answer based on question type
     if (question.type === "MCQ") {
@@ -37,9 +71,41 @@ export async function POST(
       isCorrect = correctOption?.id === selectedOption;
       score = isCorrect ? 10 : 0;
     } else if (question.type === "CODE") {
-      // Basic code validation (in production, execute code against test cases)
-      isCorrect = code && code.trim().length > 0;
-      score = isCorrect ? 10 : 0;
+      if (!question.codeChallenge) {
+        return errorResponse("Code challenge details not found", undefined, 400);
+      }
+
+      if (!code || !code.trim()) {
+        return errorResponse("Code is required for code challenge", undefined, 400);
+      }
+
+      if (!isCodeTestCaseArray(question.codeChallenge.testCases)) {
+        return errorResponse("Invalid test cases configured for this challenge", undefined, 500);
+      }
+
+      const evaluation = await evaluateCodeWithJudge0(
+        code,
+        question.codeChallenge.language,
+        question.codeChallenge.testCases,
+      );
+
+      isCorrect = evaluation.allPassed;
+      score = Math.round((evaluation.passedCount / evaluation.totalCount) * 10);
+      codeExecutionResult = {
+        passedCount: evaluation.passedCount,
+        totalCount: evaluation.totalCount,
+        testResults: evaluation.testResults,
+      };
+      evaluatedOutput = evaluation.testResults
+        .map((result, index) => {
+          const status = result.passed ? "PASS" : "FAIL";
+          const diagnostics = [result.compileOutput, result.stderr, result.runtimeError]
+            .filter(Boolean)
+            .join(" | ");
+
+          return `Case ${index + 1}: ${status} | expected=${result.expectedOutput} | actual=${result.actualOutput}${diagnostics ? ` | ${diagnostics}` : ""}`;
+        })
+        .join("\n");
     }
 
     // Store user answer
@@ -49,6 +115,7 @@ export async function POST(
         questionId,
         selectedOption: selectedOption || null,
         code: code || null,
+        output: evaluatedOutput,
         isCorrect,
         score,
       },
@@ -81,6 +148,7 @@ export async function POST(
         userAnswer,
         isCorrect,
         score,
+        codeExecutionResult,
       },
       "Answer submitted successfully",
       201,

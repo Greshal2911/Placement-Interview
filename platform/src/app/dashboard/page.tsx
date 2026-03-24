@@ -95,48 +95,48 @@ export default function DashboardPage() {
       label: "Questions Attempted",
       value: progress?.overall?.totalQuestionsAttempted || 0,
       icon: BookOpen,
-      color: "bg-blue-100 text-blue-600",
+      color: "bg-primary/20 text-primary",
     },
     {
       label: "Correct Answers",
       value: progress?.overall?.totalCorrect || 0,
       icon: CheckCircle2,
-      color: "bg-green-100 text-green-600",
+      color: "bg-emerald-500/20 text-emerald-400",
     },
     {
       label: "Overall Score",
       value: progress?.overall?.overallScore || 0,
       icon: TrendingUp,
-      color: "bg-purple-100 text-purple-600",
+      color: "bg-purple-500/20 text-purple-400",
     },
     {
       label: "Modules Completed",
       value: progress?.modules?.filter((m) => m.completed).length || 0,
       icon: Target,
-      color: "bg-amber-100 text-amber-600",
+      color: "bg-yellow-500/20 text-yellow-400",
     },
   ];
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex-1 flex flex-col">
           <Navbar />
           <main className="flex-1 overflow-auto">
             <div className="max-w-7xl mx-auto p-4 md:p-8">
               {!userId ? (
-                <div className="text-center mt-8 text-slate-600">
+                <div className="text-center mt-8 text-muted-foreground">
                   Please log in to view your dashboard.
                 </div>
               ) : (
                 <>
                   {/* Header */}
                   <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-slate-900">
+                    <h1 className="text-4xl font-bold text-foreground">
                       Welcome back! 👋
                     </h1>
-                    <p className="text-slate-600 mt-2">
+                    <p className="text-muted-foreground mt-2">
                       Track your progress and continue your learning journey
                     </p>
                   </div>
@@ -150,10 +150,10 @@ export default function DashboardPage() {
                           <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                               <div>
-                                <p className="text-sm font-medium text-slate-600">
+                                <p className="text-sm font-medium text-muted-foreground">
                                   {stat.label}
                                 </p>
-                                <p className="text-3xl font-bold text-slate-900 mt-2">
+                                <p className="text-3xl font-bold text-foreground mt-2">
                                   {stat.value}
                                 </p>
                               </div>
@@ -169,15 +169,15 @@ export default function DashboardPage() {
 
                   {/* Quick Actions */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <Card className="border-l-4 border-l-blue-600 hover:shadow-lg transition-shadow cursor-pointer">
+                    <Card className="border-l-4 border-l-primary hover:shadow-lg transition-shadow cursor-pointer">
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <BookOpen className="w-5 h-5 text-blue-600" />
+                        <CardTitle className="flex items-center gap-2 text-foreground">
+                          <BookOpen className="w-5 h-5 text-primary" />
                           Continue Learning
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-slate-600 mb-4">
+                        <p className="text-sm text-muted-foreground mb-4">
                           Pick up where you left off
                         </p>
                         <Button variant="outline" className="w-full" asChild>
@@ -188,15 +188,15 @@ export default function DashboardPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-amber-600 hover:shadow-lg transition-shadow cursor-pointer">
+                    <Card className="border-l-4 border-l-yellow-600 hover:shadow-lg transition-shadow cursor-pointer">
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Zap className="w-5 h-5 text-amber-600" />
+                        <CardTitle className="flex items-center gap-2 text-foreground">
+                          <Zap className="w-5 h-5 text-yellow-500" />
                           Practice Questions
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-slate-600 mb-4">
+                        <p className="text-sm text-muted-foreground mb-4">
                           Practice MCQs and code challenges
                         </p>
                         <Button variant="outline" className="w-full" asChild>
@@ -210,13 +210,13 @@ export default function DashboardPage() {
 
                     <Card className="border-l-4 border-l-purple-600 hover:shadow-lg transition-shadow cursor-pointer">
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Clock className="w-5 h-5 text-purple-600" />
+                        <CardTitle className="flex items-center gap-2 text-foreground">
+                          <Clock className="w-5 h-5 text-purple-400" />
                           AI Interview
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-slate-600 mb-4">
+                        <p className="text-sm text-muted-foreground mb-4">
                           Face an AI-powered interview
                         </p>
                         <Button variant="outline" className="w-full" asChild>
@@ -232,8 +232,8 @@ export default function DashboardPage() {
                   {/* Modules Progress */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Your Modules</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-foreground">Your Modules</CardTitle>
+                      <CardDescription className="text-muted-foreground">
                         Track your progress across all modules
                       </CardDescription>
                     </CardHeader>

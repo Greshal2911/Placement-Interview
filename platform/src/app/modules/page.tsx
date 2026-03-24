@@ -55,12 +55,12 @@ export default function ModulesPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen bg-slate-50">
+        <div className="flex min-h-screen bg-background">
           <Sidebar />
           <div className="flex-1 flex flex-col">
             <Navbar />
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-slate-600">Loading modules...</p>
+              <p className="text-muted-foreground">Loading modules...</p>
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function ModulesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex-1 flex flex-col">
           <Navbar />
@@ -78,11 +78,11 @@ export default function ModulesPage() {
           <div className="max-w-6xl mx-auto p-4 md:p-8">
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-slate-900 flex items-center gap-3">
-                <BookMarked className="w-10 h-10 text-blue-600" />
+              <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+                <BookMarked className="w-10 h-10 text-primary" />
                 All Modules
               </h1>
-              <p className="text-slate-600 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Dive deep into OOPs and C++ with comprehensive modules
               </p>
             </div>
@@ -101,9 +101,9 @@ export default function ModulesPage() {
 
                   {/* Expanded Details */}
                   {expandedModule === module.id && (
-                    <Card className="mt-4 border-l-4 border-l-blue-600">
+                    <Card className="mt-4 border-l-4 border-l-primary">
                       <CardHeader>
-                        <CardTitle className="text-lg">
+                        <CardTitle className="text-lg text-foreground">
                           Concepts in {module.title}
                         </CardTitle>
                       </CardHeader>
@@ -114,28 +114,28 @@ export default function ModulesPage() {
                             module.concepts.map((concept) => (
                               <div
                                 key={concept.id}
-                                className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                                className="flex items-start gap-3 p-3 bg-muted rounded-lg hover:bg-muted/70 transition-colors"
                               >
-                                <ChevronRight className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <ChevronRight className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                                 <div className="flex-1">
-                                  <h4 className="font-medium text-slate-900">
+                                  <h4 className="font-medium text-foreground">
                                     {concept.title}
                                   </h4>
-                                  <p className="text-sm text-slate-600 mt-1">
+                                  <p className="text-sm text-muted-foreground mt-1">
                                     {concept.description}
                                   </p>
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <p className="text-slate-600">
+                            <p className="text-muted-foreground">
                               No concepts available yet
                             </p>
                           )}
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-3 pt-4 mt-4 border-t border-slate-200">
+                        <div className="flex gap-3 pt-4 mt-4 border-t border-border">
                           <Button
                             onClick={() => handleStartModule(module.id)}
                             className="flex-1"
@@ -154,27 +154,27 @@ export default function ModulesPage() {
             </div>
 
             {/* Learning Path Info */}
-            <Card className="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <Card className="mt-12 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-6 h-6 text-blue-600" />
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <BookOpen className="w-6 h-6 text-primary" />
                   Recommended Learning Path
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <p className="text-slate-700">
+                  <p className="text-foreground">
                     Follow this sequence to master the concepts:
                   </p>
-                  <ol className="space-y-2 list-decimal list-inside">
+                  <ol className="space-y-2 list-decimal list-inside text-foreground">
                     {modules.map((module, index) => (
-                      <li key={module.id} className="text-slate-700">
+                      <li key={module.id}>
                         <strong>{module.title}</strong> - {module.description}
                       </li>
                     ))}
                   </ol>
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-sm text-amber-900">
+                  <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                    <p className="text-sm text-foreground">
                       💡 <strong>Tip:</strong> Complete each module sequentially
                       for best results. After completing all concepts, take an
                       AI-powered interview to test your knowledge!

@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex-1 flex flex-col">
           <Navbar />
@@ -97,11 +97,11 @@ export default function AnalyticsPage() {
             <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
               {/* Header */}
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
-                  <TrendingUp className="w-8 h-8 text-blue-600" />
+                <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+                  <TrendingUp className="w-8 h-8 text-primary" />
                   Analytics & Progress
                 </h1>
-                <p className="text-slate-600 mt-2">
+                <p className="text-muted-foreground mt-2">
                   Track your learning journey and performance metrics
                 </p>
               </div>
@@ -111,13 +111,13 @@ export default function AnalyticsPage() {
                 {stats.map((stat, index) => (
                   <Card key={index}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-slate-600 flex items-center justify-between">
+                      <CardTitle className="text-sm text-muted-foreground flex items-center justify-between">
                         {stat.label}
                         <span className={`${stat.color}`}>{stat.icon}</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+                      <p className="text-3xl font-bold text-foreground">{stat.value}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -128,21 +128,21 @@ export default function AnalyticsPage() {
                 {/* Daily Progress */}
                 <Card className="lg:col-span-2">
                   <CardHeader>
-                    <CardTitle>Daily Progress</CardTitle>
-                    <CardDescription>Questions answered this week</CardDescription>
+                    <CardTitle className="text-foreground">Daily Progress</CardTitle>
+                    <CardDescription className="text-muted-foreground">Questions answered this week</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={dailyProgress}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="date" stroke="#94a3b8" />
-                        <YAxis stroke="#94a3b8" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#363d5a" />
+                        <XAxis dataKey="date" stroke="#9ca3af" />
+                        <YAxis stroke="#9ca3af" />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: "#1e293b",
-                            border: "1px solid #475569",
+                            backgroundColor: "#1a1f35",
+                            border: "1px solid #363d5a",
                             borderRadius: "8px",
-                            color: "#f1f5f9",
+                            color: "#f0f4f8",
                           }}
                         />
                         <Legend />
@@ -156,8 +156,8 @@ export default function AnalyticsPage() {
                 {/* Question Type Distribution */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Question Types</CardTitle>
-                    <CardDescription>Breakdown by type</CardDescription>
+                    <CardTitle className="text-foreground">Question Types</CardTitle>
+                    <CardDescription className="text-muted-foreground">Breakdown by type</CardDescription>
                   </CardHeader>
                   <CardContent className="flex justify-center">
                     <ResponsiveContainer width="100%" height={250}>
@@ -178,10 +178,10 @@ export default function AnalyticsPage() {
                         </Pie>
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: "#1e293b",
-                            border: "1px solid #475569",
+                            backgroundColor: "#1a1f35",
+                            border: "1px solid #363d5a",
                             borderRadius: "8px",
-                            color: "#f1f5f9",
+                            color: "#f0f4f8",
                           }}
                         />
                       </PieChart>
@@ -193,22 +193,22 @@ export default function AnalyticsPage() {
               {/* Module Performance */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Module Performance</CardTitle>
-                  <CardDescription>Your progress in each module</CardDescription>
+                  <CardTitle className="text-foreground">Module Performance</CardTitle>
+                  <CardDescription className="text-muted-foreground">Your progress in each module</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {moduleStats.map((module, index) => (
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <p className="font-medium text-slate-900">{module.name}</p>
+                          <p className="font-medium text-foreground">{module.name}</p>
                           <Badge variant="outline">{module.score}%</Badge>
                         </div>
                         
                         {/* Progress Bar */}
-                        <div className="w-full h-8 bg-slate-200 rounded-lg overflow-hidden">
+                        <div className="w-full h-8 bg-muted rounded-lg overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium transition-all"
+                            className="h-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-foreground text-xs font-medium transition-all"
                             style={{ width: `${module.score}%` }}
                           >
                             {module.score > 20 && `${module.score}%`}
@@ -216,10 +216,10 @@ export default function AnalyticsPage() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex gap-4 text-sm text-slate-600">
+                        <div className="flex gap-4 text-sm text-muted-foreground">
                           <span>Attempted: {module.attempted}</span>
                           <span>Completed: {module.completed}</span>
-                          <span className="text-green-600">
+                          <span className="text-emerald-400">
                             Correct: {Math.round((module.completed * module.score) / 100)}
                           </span>
                         </div>
@@ -233,7 +233,7 @@ export default function AnalyticsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Learning Pace</CardTitle>
+                    <CardTitle className="text-lg text-foreground">Learning Pace</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={200}>
@@ -245,15 +245,15 @@ export default function AnalyticsPage() {
                           { week: "W4", cumulative: 40 },
                         ]}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="week" stroke="#94a3b8" />
-                        <YAxis stroke="#94a3b8" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#363d5a" />
+                        <XAxis dataKey="week" stroke="#9ca3af" />
+                        <YAxis stroke="#9ca3af" />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: "#1e293b",
-                            border: "1px solid #475569",
+                            backgroundColor: "#1a1f35",
+                            border: "1px solid #363d5a",
                             borderRadius: "8px",
-                            color: "#f1f5f9",
+                            color: "#f0f4f8",
                           }}
                         />
                         <Line
@@ -270,28 +270,28 @@ export default function AnalyticsPage() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Achievements</CardTitle>
+                    <CardTitle className="text-lg text-foreground">Achievements</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg">
+                    <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-lg border border-yellow-500/20">
                       <span className="text-2xl">🌟</span>
                       <div>
-                        <p className="font-medium text-slate-900">First Steps</p>
-                        <p className="text-xs text-slate-600">Complete first question</p>
+                        <p className="font-medium text-foreground">First Steps</p>
+                        <p className="text-xs text-muted-foreground">Complete first question</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg">
+                    <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
                       <span className="text-2xl">🎯</span>
                       <div>
-                        <p className="font-medium text-slate-900">Perfect Week</p>
-                        <p className="text-xs text-slate-600">7 consecutive days</p>
+                        <p className="font-medium text-foreground">Perfect Week</p>
+                        <p className="text-xs text-muted-foreground">7 consecutive days</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-slate-100 rounded-lg opacity-50">
+                    <div className="flex items-center gap-3 p-2 bg-muted rounded-lg opacity-50 border border-border">
                       <span className="text-2xl">🏆</span>
                       <div>
-                        <p className="font-medium text-slate-900">Master</p>
-                        <p className="text-xs text-slate-600">Complete all modules</p>
+                        <p className="font-medium text-foreground">Master</p>
+                        <p className="text-xs text-muted-foreground">Complete all modules</p>
                       </div>
                     </div>
                   </CardContent>

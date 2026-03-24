@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { Prisma } from "@prisma/client";
 
 export async function GET(
   request: NextRequest,
@@ -52,14 +53,43 @@ export async function GET(
 
     if (!moduleProgress.length) {
       const modules = await prisma.module.findMany({ select: { id: true } });
-      moduleProgress = await Promise.all(
-        modules.map((module) =>
-          prisma.moduleProgress.create({
-            data: { userId: user.id, moduleId: module.id },
-            include: { module: true },
-          }),
-        ),
-      );
+
+      // Neon HTTP mode does not support transactional behavior used by upsert,
+      // so initialize progress rows with explicit read/create operations.
+      for (const module of modules) {
+        const existing = await prisma.moduleProgress.findFirst({
+          where: {
+            userId: user.id,
+            moduleId: module.id,
+          },
+          select: { id: true },
+        });
+
+        if (!existing) {
+          try {
+            await prisma.moduleProgress.create({
+              data: {
+                userId: user.id,
+                moduleId: module.id,
+              },
+            });
+          } catch (createError) {
+            // Ignore duplicate row races from concurrent requests.
+            if (
+              !(createError instanceof Prisma.PrismaClientKnownRequestError) ||
+              createError.code !== "P2002"
+            ) {
+              throw createError;
+            }
+          }
+        }
+      }
+
+      moduleProgress = await prisma.moduleProgress.findMany({
+        where: { userId: user.id },
+        include: { module: true },
+        orderBy: { module: { order: "asc" } },
+      });
     }
 
     return successResponse(

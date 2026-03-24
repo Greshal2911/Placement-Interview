@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import type { PoolConfig } from "@neondatabase/serverless";
+import { PrismaNeonHttp } from "@prisma/adapter-neon";
+import type { HTTPQueryOptions } from "@neondatabase/serverless";
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -13,11 +13,11 @@ if (!databaseUrl) {
 }
 
 const createPrismaClient = () => {
-  const poolConfig: PoolConfig = { connectionString: databaseUrl };
+  const httpOptions: HTTPQueryOptions<false, false> = {};
 
   return new PrismaClient({
     log: ["error", "warn"],
-    adapter: new PrismaNeon(poolConfig),
+    adapter: new PrismaNeonHttp(databaseUrl, httpOptions),
   });
 };
 
