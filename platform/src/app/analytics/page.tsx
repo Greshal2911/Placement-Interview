@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/shared/navbar";
-import { Sidebar } from "@/components/shared/sidebar";
 import { ProtectedRoute } from "@/components/shared/protected-route";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -22,7 +27,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { TrendingUp, Award, BookOpen, Zap, Calendar, Clock } from "lucide-react";
+import {
+  TrendingUp,
+  Award,
+  BookOpen,
+  Zap,
+  Calendar,
+  Clock,
+} from "lucide-react";
 
 interface ModuleStats {
   name: string;
@@ -89,217 +101,247 @@ export default function AnalyticsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Navbar />
-          <main className="flex-1 overflow-auto">
-            <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
-              {/* Header */}
-              <div>
-                <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-                  <TrendingUp className="w-8 h-8 text-primary" />
-                  Analytics & Progress
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Track your learning journey and performance metrics
-                </p>
-              </div>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 w-full overflow-auto">
+          <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+            {/* Header */}
+            <div>
+              <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+                <TrendingUp className="w-8 h-8 text-primary" />
+                Analytics & Progress
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Track your learning journey and performance metrics
+              </p>
+            </div>
 
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {stats.map((stat, index) => (
-                  <Card key={index}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-muted-foreground flex items-center justify-between">
-                        {stat.label}
-                        <span className={`${stat.color}`}>{stat.icon}</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Charts Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Daily Progress */}
-                <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="text-foreground">Daily Progress</CardTitle>
-                    <CardDescription className="text-muted-foreground">Questions answered this week</CardDescription>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {stats.map((stat, index) => (
+                <Card key={index}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-muted-foreground flex items-center justify-between">
+                      {stat.label}
+                      <span className={`${stat.color}`}>{stat.icon}</span>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={dailyProgress}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#363d5a" />
-                        <XAxis dataKey="date" stroke="#9ca3af" />
-                        <YAxis stroke="#9ca3af" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#1a1f35",
-                            border: "1px solid #363d5a",
-                            borderRadius: "8px",
-                            color: "#f0f4f8",
-                          }}
-                        />
-                        <Legend />
-                        <Bar dataKey="questions" fill="#3b82f6" name="Questions" />
-                        <Bar dataKey="correct" fill="#10b981" name="Correct" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <p className="text-3xl font-bold text-foreground">
+                      {stat.value}
+                    </p>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
 
-                {/* Question Type Distribution */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-foreground">Question Types</CardTitle>
-                    <CardDescription className="text-muted-foreground">Breakdown by type</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie
-                          data={questionTypeData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, value }) => `${name}: ${value}`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {questionTypeData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index]} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#1a1f35",
-                            border: "1px solid #363d5a",
-                            borderRadius: "8px",
-                            color: "#f0f4f8",
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Module Performance */}
-              <Card>
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Daily Progress */}
+              <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-foreground">Module Performance</CardTitle>
-                  <CardDescription className="text-muted-foreground">Your progress in each module</CardDescription>
+                  <CardTitle className="text-foreground">
+                    Daily Progress
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Questions answered this week
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {moduleStats.map((module, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <p className="font-medium text-foreground">{module.name}</p>
-                          <Badge variant="outline">{module.score}%</Badge>
-                        </div>
-                        
-                        {/* Progress Bar */}
-                        <div className="w-full h-8 bg-muted rounded-lg overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-foreground text-xs font-medium transition-all"
-                            style={{ width: `${module.score}%` }}
-                          >
-                            {module.score > 20 && `${module.score}%`}
-                          </div>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="flex gap-4 text-sm text-muted-foreground">
-                          <span>Attempted: {module.attempted}</span>
-                          <span>Completed: {module.completed}</span>
-                          <span className="text-emerald-400">
-                            Correct: {Math.round((module.completed * module.score) / 100)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={dailyProgress}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#363d5a" />
+                      <XAxis dataKey="date" stroke="#9ca3af" />
+                      <YAxis stroke="#9ca3af" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1a1f35",
+                          border: "1px solid #363d5a",
+                          borderRadius: "8px",
+                          color: "#f0f4f8",
+                        }}
+                      />
+                      <Legend />
+                      <Bar
+                        dataKey="questions"
+                        fill="#3b82f6"
+                        name="Questions"
+                      />
+                      <Bar dataKey="correct" fill="#10b981" name="Correct" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              {/* Learning Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg text-foreground">Learning Pace</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <LineChart
-                        data={[
-                          { week: "W1", cumulative: 5 },
-                          { week: "W2", cumulative: 12 },
-                          { week: "W3", cumulative: 18 },
-                          { week: "W4", cumulative: 40 },
-                        ]}
+              {/* Question Type Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-foreground">
+                    Question Types
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Breakdown by type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={questionTypeData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, value }) => `${name}: ${value}`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#363d5a" />
-                        <XAxis dataKey="week" stroke="#9ca3af" />
-                        <YAxis stroke="#9ca3af" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#1a1f35",
-                            border: "1px solid #363d5a",
-                            borderRadius: "8px",
-                            color: "#f0f4f8",
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="cumulative"
-                          stroke="#3b82f6"
-                          strokeWidth={2}
-                          dot={{ fill: "#3b82f6", r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg text-foreground">Achievements</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-lg border border-yellow-500/20">
-                      <span className="text-2xl">🌟</span>
-                      <div>
-                        <p className="font-medium text-foreground">First Steps</p>
-                        <p className="text-xs text-muted-foreground">Complete first question</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
-                      <span className="text-2xl">🎯</span>
-                      <div>
-                        <p className="font-medium text-foreground">Perfect Week</p>
-                        <p className="text-xs text-muted-foreground">7 consecutive days</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-2 bg-muted rounded-lg opacity-50 border border-border">
-                      <span className="text-2xl">🏆</span>
-                      <div>
-                        <p className="font-medium text-foreground">Master</p>
-                        <p className="text-xs text-muted-foreground">Complete all modules</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                        {questionTypeData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1a1f35",
+                          border: "1px solid #363d5a",
+                          borderRadius: "8px",
+                          color: "#f0f4f8",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
             </div>
-          </main>
-        </div>
+
+            {/* Module Performance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-foreground">
+                  Module Performance
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Your progress in each module
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {moduleStats.map((module, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium text-foreground">
+                          {module.name}
+                        </p>
+                        <Badge variant="outline">{module.score}%</Badge>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full h-8 bg-muted rounded-lg overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-foreground text-xs font-medium transition-all"
+                          style={{ width: `${module.score}%` }}
+                        >
+                          {module.score > 20 && `${module.score}%`}
+                        </div>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex gap-4 text-sm text-muted-foreground">
+                        <span>Attempted: {module.attempted}</span>
+                        <span>Completed: {module.completed}</span>
+                        <span className="text-emerald-400">
+                          Correct:{" "}
+                          {Math.round((module.completed * module.score) / 100)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Learning Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg text-foreground">
+                    Learning Pace
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart
+                      data={[
+                        { week: "W1", cumulative: 5 },
+                        { week: "W2", cumulative: 12 },
+                        { week: "W3", cumulative: 18 },
+                        { week: "W4", cumulative: 40 },
+                      ]}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#363d5a" />
+                      <XAxis dataKey="week" stroke="#9ca3af" />
+                      <YAxis stroke="#9ca3af" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1a1f35",
+                          border: "1px solid #363d5a",
+                          borderRadius: "8px",
+                          color: "#f0f4f8",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="cumulative"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        dot={{ fill: "#3b82f6", r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg text-foreground">
+                    Achievements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-lg border border-yellow-500/20">
+                    <span className="text-2xl">🌟</span>
+                    <div>
+                      <p className="font-medium text-foreground">First Steps</p>
+                      <p className="text-xs text-muted-foreground">
+                        Complete first question
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
+                    <span className="text-2xl">🎯</span>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        Perfect Week
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        7 consecutive days
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 bg-muted rounded-lg opacity-50 border border-border">
+                    <span className="text-2xl">🏆</span>
+                    <div>
+                      <p className="font-medium text-foreground">Master</p>
+                      <p className="text-xs text-muted-foreground">
+                        Complete all modules
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </main>
       </div>
     </ProtectedRoute>
   );

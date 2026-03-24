@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/shared/navbar";
-import { Sidebar } from "@/components/shared/sidebar";
 import { ProtectedRoute } from "@/components/shared/protected-route";
 import { useAuth } from "@/lib/auth-context";
 import { Sparkles, ShieldCheck } from "lucide-react";
@@ -46,12 +45,10 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-[#030712] text-slate-100">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Navbar />
-          <main className="flex-1 overflow-auto">
-            <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
+      <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col">
+        <Navbar />
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
               <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-8 shadow-2xl">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                   <div className="space-y-3">

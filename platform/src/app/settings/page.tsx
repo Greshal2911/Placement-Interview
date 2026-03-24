@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/shared/navbar";
-import { Sidebar } from "@/components/shared/sidebar";
 import { ProtectedRoute } from "@/components/shared/protected-route";
 import { useAuth } from "@/lib/auth-context";
 import { Bell, Moon, Zap, Lock, Volume2, Eye } from "lucide-react";
@@ -68,12 +67,10 @@ export default function SettingsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Navbar />
-          <main className="flex-1 overflow-auto">
-            <div className="max-w-2xl mx-auto p-4 md:p-8 space-y-6">
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-2xl mx-auto p-4 md:p-8 space-y-6">
               {/* Settings Header */}
               <div>
                 <h1 className="text-3xl font-bold text-foreground">Settings</h1>

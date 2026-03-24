@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/shared/navbar";
-import { Sidebar } from "@/components/shared/sidebar";
 import { ModuleCard } from "@/components/shared/module-card";
 import { ProtectedRoute } from "@/components/shared/protected-route";
 import { useAuth } from "@/lib/auth-context";
@@ -119,167 +118,163 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Navbar />
-          <main className="flex-1 overflow-auto">
-            <div className="max-w-7xl mx-auto p-4 md:p-8">
-              {!userId ? (
-                <div className="text-center mt-8 text-muted-foreground">
-                  Please log in to view your dashboard.
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 w-full overflow-auto">
+          <div className="max-w-7xl mx-auto p-4 md:p-8">
+            {!userId ? (
+              <div className="text-center mt-8 text-muted-foreground">
+                Please log in to view your dashboard.
+              </div>
+            ) : (
+              <>
+                {/* Header */}
+                <div className="mb-8">
+                  <h1 className="text-4xl font-bold text-foreground">
+                    Welcome back! 👋
+                  </h1>
+                  <p className="text-muted-foreground mt-2">
+                    Track your progress and continue your learning journey
+                  </p>
                 </div>
-              ) : (
-                <>
-                  {/* Header */}
-                  <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-foreground">
-                      Welcome back! 👋
-                    </h1>
-                    <p className="text-muted-foreground mt-2">
-                      Track your progress and continue your learning journey
-                    </p>
-                  </div>
 
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    {stats.map((stat, index) => {
-                      const Icon = stat.icon;
-                      return (
-                        <Card key={index}>
-                          <CardContent className="pt-6">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  {stat.label}
-                                </p>
-                                <p className="text-3xl font-bold text-foreground mt-2">
-                                  {stat.value}
-                                </p>
-                              </div>
-                              <div className={`p-3 rounded-lg ${stat.color}`}>
-                                <Icon className="w-6 h-6" />
-                              </div>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  {stats.map((stat, index) => {
+                    const Icon = stat.icon;
+                    return (
+                      <Card key={index}>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">
+                                {stat.label}
+                              </p>
+                              <p className="text-3xl font-bold text-foreground mt-2">
+                                {stat.value}
+                              </p>
                             </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
+                            <div className={`p-3 rounded-lg ${stat.color}`}>
+                              <Icon className="w-6 h-6" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
 
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <Card className="border-l-4 border-l-primary hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-foreground">
-                          <BookOpen className="w-5 h-5 text-primary" />
-                          Continue Learning
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Pick up where you left off
-                        </p>
-                        <Button variant="outline" className="w-full" asChild>
-                          <Link href="/modules">
-                            View Modules <ArrowRight className="w-4 h-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="border-l-4 border-l-yellow-600 hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-foreground">
-                          <Zap className="w-5 h-5 text-yellow-500" />
-                          Practice Questions
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Practice MCQs and code challenges
-                        </p>
-                        <Button variant="outline" className="w-full" asChild>
-                          <Link href="/practice">
-                            Start Practice{" "}
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="border-l-4 border-l-purple-600 hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-foreground">
-                          <Clock className="w-5 h-5 text-purple-400" />
-                          AI Interview
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Face an AI-powered interview
-                        </p>
-                        <Button variant="outline" className="w-full" asChild>
-                          <Link href="/interview">
-                            Start Interview{" "}
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Modules Progress */}
-                  <Card>
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  <Card className="border-l-4 border-l-primary hover:shadow-lg transition-shadow cursor-pointer">
                     <CardHeader>
-                      <CardTitle className="text-foreground">Your Modules</CardTitle>
-                      <CardDescription className="text-muted-foreground">
-                        Track your progress across all modules
-                      </CardDescription>
+                      <CardTitle className="flex items-center gap-2 text-foreground">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        Continue Learning
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {loading ? (
-                        <div className="text-center py-8">
-                          Loading modules...
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {modules.map((module) => {
-                            const moduleProgress = progress?.modules?.find(
-                              (m) => m.moduleId === module.id,
-                            );
-                            const progressPercent = moduleProgress
-                              ? Math.round(
-                                  (moduleProgress.questionsCorrect /
-                                    (moduleProgress.questionsAttempted || 1)) *
-                                    100,
-                                )
-                              : 0;
-
-                            return (
-                              <ModuleCard
-                                key={module.id}
-                                id={module.id}
-                                title={module.title}
-                                description={module.description}
-                                progress={progressPercent}
-                                questionsCount={module._count?.questions || 0}
-                                completed={moduleProgress?.completed || false}
-                                onClick={() => {
-                                  // Navigate to module
-                                }}
-                              />
-                            );
-                          })}
-                        </div>
-                      )}
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Pick up where you left off
+                      </p>
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href="/modules">
+                          View Modules <ArrowRight className="w-4 h-4 ml-2" />
+                        </Link>
+                      </Button>
                     </CardContent>
                   </Card>
-                </>
-              )}
-            </div>
-          </main>
-        </div>
+
+                  <Card className="border-l-4 border-l-yellow-600 hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-foreground text-2xl md:text-3xl font-semibold">
+                        <Zap className="w-5 h-5 text-yellow-500" />
+                        Practice Questions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Practice MCQs and code challenges
+                      </p>
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href="/practice">
+                          Start Practice <ArrowRight className="w-4 h-4 ml-2" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-l-4 border-l-purple-600 hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-foreground text-2xl md:text-3xl font-semibold">
+                        <Clock className="w-5 h-5 text-purple-400" />
+                        AI Interview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Face an AI-powered interview
+                      </p>
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href="/interview">
+                          Start Interview{" "}
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Modules Progress */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-foreground">
+                      Your Modules
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Track your progress across all modules
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <div className="text-center py-8">Loading modules...</div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {modules.map((module) => {
+                          const moduleProgress = progress?.modules?.find(
+                            (m) => m.moduleId === module.id,
+                          );
+                          const progressPercent = moduleProgress
+                            ? Math.round(
+                                (moduleProgress.questionsCorrect /
+                                  (moduleProgress.questionsAttempted || 1)) *
+                                  100,
+                              )
+                            : 0;
+
+                          return (
+                            <ModuleCard
+                              key={module.id}
+                              id={module.id}
+                              title={module.title}
+                              description={module.description}
+                              progress={progressPercent}
+                              questionsCount={module._count?.questions || 0}
+                              completed={moduleProgress?.completed || false}
+                              onClick={() => {
+                                // Navigate to module
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
+        </main>
       </div>
     </ProtectedRoute>
   );
