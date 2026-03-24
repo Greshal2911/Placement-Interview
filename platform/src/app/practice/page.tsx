@@ -2,42 +2,37 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navbar } from "@/components/shared/navbar";
 import { ProtectedRoute } from "@/components/shared/protected-route";
 import { useAuth } from "@/lib/auth-context";
 import {
-  AlertTriangle,
+  ArrowLeft,
+  ArrowUpRight,
+  Binary,
+  BrainCircuit,
   CheckCircle2,
-  Clock3,
+  GitBranch,
+  Layers,
   Loader,
-  MemoryStick,
+  Network,
   Play,
+  ScanSearch,
+  Sigma,
+  Waypoints,
   XCircle,
 } from "lucide-react";
-
-interface MCQOption {
-  id: string;
-  text: string;
-  order: number;
-  isCorrect?: boolean;
-}
 
 interface Question {
   id: string;
   title: string;
   description: string;
   type: "MCQ" | "CODE";
+  moduleId: string;
   difficulty: "Easy" | "Medium" | "Hard" | string;
-  mcqOptions?: MCQOption[];
   codeChallenge?: {
     language?: string;
     boilerplate?: string;
@@ -47,6 +42,12 @@ interface Question {
       visible?: boolean;
     }>;
   };
+}
+
+interface Module {
+  id: string;
+  title: string;
+  description: string;
 }
 
 interface SandboxTestResult {
@@ -74,12 +75,154 @@ interface SubmissionResult {
   codeExecutionResult?: CodeExecutionResult;
 }
 
+type Track = {
+  id: string;
+  title: string;
+  description: string;
+  modules: number;
+  problems: number;
+  level: "Beginner" | "Intermediate" | "Advanced";
+  icon: React.ComponentType<{ className?: string }>;
+  borderClass: string;
+  hoverClass: string;
+  headerGradientClass: string;
+  moduleKeywords: string[];
+  keywords: string[];
+};
+
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
-  loading: () => (
-    <div className="h-96 w-full rounded-lg border border-border bg-muted animate-pulse" />
-  ),
+  loading: () => <div className="h-96 w-full animate-pulse rounded-lg bg-slate-900" />,
 });
+
+const tracks: Track[] = [
+  {
+    id: "arrays-strings",
+    title: "Arrays and Strings",
+    description:
+      "Master sliding window, prefix sums, hashing tricks, and two-pointer patterns.",
+    modules: 11,
+    problems: 68,
+    level: "Beginner",
+    icon: Layers,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["array", "string"],
+    keywords: ["array", "string", "subarray", "prefix", "window", "two pointer"],
+  },
+  {
+    id: "linkedlist-stack-queue",
+    title: "Linked List, Stack, Queue",
+    description:
+      "Build intuition for pointer moves, monotonic stack design, and queue-based simulation.",
+    modules: 9,
+    problems: 52,
+    level: "Beginner",
+    icon: Waypoints,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["linked", "stack", "queue"],
+    keywords: ["linked", "stack", "queue", "parenthesis", "next greater"],
+  },
+  {
+    id: "hashing-maps",
+    title: "Hashing and Maps",
+    description:
+      "Solve frequency counting, set membership, and collision-prone edge cases quickly.",
+    modules: 8,
+    problems: 47,
+    level: "Beginner",
+    icon: Sigma,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["hash", "map", "set"],
+    keywords: ["hash", "map", "set", "frequency", "duplicate"],
+  },
+  {
+    id: "binary-search",
+    title: "Binary Search Patterns",
+    description:
+      "Go beyond sorted arrays with answer-space search and monotonic decision functions.",
+    modules: 7,
+    problems: 39,
+    level: "Intermediate",
+    icon: Binary,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["binary", "search"],
+    keywords: ["binary", "search", "sorted", "lower bound", "upper bound"],
+  },
+  {
+    id: "trees-bst-heaps",
+    title: "Trees, BST, Heaps",
+    description:
+      "Practice DFS/BFS traversals, balancing ideas, and heap-based greedy workflows.",
+    modules: 12,
+    problems: 71,
+    level: "Intermediate",
+    icon: Network,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["tree", "bst", "heap"],
+    keywords: ["tree", "bst", "heap", "traversal", "bfs", "dfs"],
+  },
+  {
+    id: "backtracking-recursion",
+    title: "Backtracking and Recursion",
+    description:
+      "Handle subsets, permutations, pruning, and recursion tree optimization strategies.",
+    modules: 8,
+    problems: 45,
+    level: "Intermediate",
+    icon: ScanSearch,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["recursion", "backtracking"],
+    keywords: ["recursion", "backtracking", "subset", "permutation", "combination"],
+  },
+  {
+    id: "graphs",
+    title: "Graph Algorithms",
+    description:
+      "Cover connected components, shortest path, topological sort, and DSU fundamentals.",
+    modules: 13,
+    problems: 77,
+    level: "Advanced",
+    icon: GitBranch,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["graph"],
+    keywords: ["graph", "shortest", "path", "dijkstra", "topological", "union find"],
+  },
+  {
+    id: "dp",
+    title: "Dynamic Programming",
+    description:
+      "Build tabulation and memoization instincts from 1D DP to grid and state-compression DP.",
+    modules: 15,
+    problems: 92,
+    level: "Advanced",
+    icon: BrainCircuit,
+    borderClass: "border-cyan-400/35",
+    hoverClass: "hover:border-cyan-300/60",
+    headerGradientClass: "from-cyan-500/30 to-teal-500/10",
+    moduleKeywords: ["dynamic", "dp"],
+    keywords: ["dp", "dynamic", "memo", "knapsack", "subsequence"],
+  },
+];
+
+const levelStyles: Record<Track["level"], string> = {
+  Beginner: "bg-emerald-500/15 text-emerald-300 border-emerald-400/40",
+  Intermediate: "bg-amber-500/15 text-amber-300 border-amber-400/40",
+  Advanced: "bg-rose-500/15 text-rose-300 border-rose-400/40",
+};
 
 function getMonacoLanguage(language?: string): string {
   const normalized = (language || "cpp").toLowerCase();
@@ -92,7 +235,7 @@ function getMonacoLanguage(language?: string): string {
 }
 
 function getInitialCode(question?: Question): string {
-  if (question?.type !== "CODE") return "";
+  if (!question) return "";
 
   return (
     question.codeChallenge?.boilerplate ||
@@ -100,15 +243,8 @@ function getInitialCode(question?: Question): string {
   );
 }
 
-function PracticeLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
-        <main className="flex-1 w-full overflow-auto">{children}</main>
-      </div>
-    </ProtectedRoute>
-  );
+function normalizeText(value: string): string {
+  return value.toLowerCase();
 }
 
 function SandboxResultsPanel({
@@ -119,65 +255,45 @@ function SandboxResultsPanel({
   if (!codeExecutionResult) return null;
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="space-y-3">
       <div className="flex items-center justify-between text-sm">
-        <span className="font-medium text-foreground">
-          Sandbox Test Results
-        </span>
-        <Badge variant="outline" className="bg-muted/50 text-foreground">
-          {codeExecutionResult.passedCount} / {codeExecutionResult.totalCount}{" "}
-          passed
+        <span className="font-medium text-slate-200">Sandbox Test Results</span>
+        <Badge variant="outline" className="bg-slate-900 text-slate-200">
+          {codeExecutionResult.passedCount} / {codeExecutionResult.totalCount} passed
         </Badge>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {codeExecutionResult.testResults.map((result, index) => (
           <div
             key={index}
-            className={`rounded-lg border p-3 bg-card ${
-              result.passed ? "border-emerald-500/30" : "border-destructive/30"
+            className={`rounded-lg border p-3 text-sm ${
+              result.passed
+                ? "border-emerald-500/35 bg-emerald-500/10"
+                : "border-red-500/35 bg-red-500/10"
             }`}
           >
-            <div className="flex items-center justify-between mb-2 text-sm">
+            <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {result.passed ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 ) : (
-                  <XCircle className="w-4 h-4 text-destructive" />
+                  <XCircle className="h-4 w-4 text-red-400" />
                 )}
-                <span className="font-medium">
-                  Case {index + 1} · {result.passed ? "Passed" : "Failed"}
-                </span>
+                <span className="font-medium text-slate-100">Case {index + 1}</span>
               </div>
-              <span className="text-muted-foreground text-xs">
-                {result.status.description}
-              </span>
+              <span className="text-xs text-slate-300">{result.status.description}</span>
             </div>
-            <div className="text-xs text-muted-foreground space-y-1">
+            <div className="space-y-1 text-xs text-slate-300">
               <p>
-                <strong>Input:</strong> {result.input}
+                <strong>Input:</strong> {result.input || "(empty)"}
               </p>
               <p>
-                <strong>Expected:</strong> {result.expectedOutput}
+                <strong>Expected:</strong> {result.expectedOutput || "(empty)"}
               </p>
               <p>
-                <strong>Actual:</strong> {result.actualOutput}
+                <strong>Actual:</strong> {result.actualOutput || "(empty)"}
               </p>
-              {result.compileOutput && (
-                <p>
-                  <strong>Compile:</strong> {result.compileOutput}
-                </p>
-              )}
-              {result.stderr && (
-                <p>
-                  <strong>Stderr:</strong> {result.stderr}
-                </p>
-              )}
-              {result.runtimeError && (
-                <p>
-                  <strong>Runtime:</strong> {result.runtimeError}
-                </p>
-              )}
             </div>
           </div>
         ))}
@@ -187,52 +303,69 @@ function SandboxResultsPanel({
 }
 
 export default function PracticePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
+
   const userId = user?.id || null;
 
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState("");
+
+  const [selectedTrackId, setSelectedTrackId] = useState<string | null>(
+    searchParams.get("track"),
+  );
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(
+    searchParams.get("question"),
+  );
+
   const [codeAnswer, setCodeAnswer] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isRunningSandbox, setIsRunningSandbox] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<SubmissionResult | null>(null);
-  const [sandboxResult, setSandboxResult] =
-    useState<CodeExecutionResult | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRunningSandbox, setIsRunningSandbox] = useState(false);
-
-  const currentQuestion = questions[currentIndex];
+  const [sandboxResult, setSandboxResult] = useState<CodeExecutionResult | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchQuestions = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch("/api/questions?limit=10");
-        const payload = await res.json();
+        const [questionsRes, modulesRes] = await Promise.all([
+          fetch("/api/questions?type=CODE&limit=200"),
+          fetch("/api/modules"),
+        ]);
+        const questionsPayload = await questionsRes.json();
+        const modulesPayload = await modulesRes.json();
 
-        if (!res.ok) {
-          throw new Error(payload?.message || "Failed to fetch questions");
+        if (!questionsRes.ok) {
+          throw new Error(
+            questionsPayload?.message || "Failed to fetch coding questions",
+          );
+        }
+
+        if (!modulesRes.ok) {
+          throw new Error(modulesPayload?.message || "Failed to fetch modules");
         }
 
         if (!isMounted) return;
-        setQuestions(payload.data || []);
-        setCurrentIndex(0);
+        setQuestions(questionsPayload.data || []);
+        setModules(modulesPayload.data || []);
         setError(null);
       } catch (err) {
         if (!isMounted) return;
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        setError(err instanceof Error ? err.message : "Failed to fetch questions");
       } finally {
         if (!isMounted) return;
         setLoading(false);
       }
     };
 
-    fetchQuestions();
+    fetchData();
 
     return () => {
       isMounted = false;
@@ -240,92 +373,111 @@ export default function PracticePage() {
   }, []);
 
   useEffect(() => {
-    setSelectedAnswer("");
-    setSandboxResult(null);
-    setResult(null);
+    const params = new URLSearchParams();
+    if (selectedTrackId) params.set("track", selectedTrackId);
+    if (selectedQuestionId) params.set("question", selectedQuestionId);
+
+    const query = params.toString();
+    router.replace(query ? `/practice?${query}` : "/practice");
+  }, [selectedTrackId, selectedQuestionId, router]);
+
+  const selectedTrack = useMemo(
+    () => tracks.find((track) => track.id === selectedTrackId) || null,
+    [selectedTrackId],
+  );
+
+  const selectedTrackModuleIds = useMemo(() => {
+    if (!selectedTrack) return [] as string[];
+
+    return modules
+      .filter((module) => {
+        const moduleText = normalizeText(`${module.title} ${module.description}`);
+        return selectedTrack.moduleKeywords.some((keyword) =>
+          moduleText.includes(normalizeText(keyword)),
+        );
+      })
+      .map((module) => module.id);
+  }, [modules, selectedTrack]);
+
+  const filteredQuestions = useMemo(() => {
+    if (!selectedTrack) return [];
+
+    if (selectedTrackModuleIds.length > 0) {
+      const moduleMappedQuestions = questions.filter((question) =>
+        selectedTrackModuleIds.includes(question.moduleId),
+      );
+
+      if (moduleMappedQuestions.length > 0) {
+        return moduleMappedQuestions;
+      }
+    }
+
+    return questions.filter((question) => {
+      const text = normalizeText(`${question.title} ${question.description}`);
+      return selectedTrack.keywords.some((keyword) => text.includes(normalizeText(keyword)));
+    });
+  }, [questions, selectedTrack, selectedTrackModuleIds]);
+
+  const trackHasStrictMatches = useMemo(() => {
+    if (!selectedTrack) return false;
+
+    if (selectedTrackModuleIds.length > 0) {
+      const moduleMappedQuestions = questions.filter((question) =>
+        selectedTrackModuleIds.includes(question.moduleId),
+      );
+      if (moduleMappedQuestions.length > 0) return true;
+    }
+
+    return questions.some((question) => {
+      const text = normalizeText(`${question.title} ${question.description}`);
+      return selectedTrack.keywords.some((keyword) => text.includes(normalizeText(keyword)));
+    });
+  }, [questions, selectedTrack, selectedTrackModuleIds]);
+
+  const selectedQuestion = useMemo(
+    () => filteredQuestions.find((question) => question.id === selectedQuestionId) || null,
+    [filteredQuestions, selectedQuestionId],
+  );
+
+  useEffect(() => {
+    if (!selectedQuestion) return;
+
+    setCodeAnswer(getInitialCode(selectedQuestion));
     setActionError(null);
     setSubmitted(false);
-    setCodeAnswer(getInitialCode(currentQuestion));
-  }, [currentQuestion?.id]);
+    setResult(null);
+    setSandboxResult(null);
+  }, [selectedQuestion?.id]);
 
-  const mcqCount = useMemo(
-    () => questions.filter((question) => question.type === "MCQ").length,
-    [questions],
-  );
-
-  const codeCount = useMemo(
-    () => questions.filter((question) => question.type === "CODE").length,
-    [questions],
-  );
-
-  const handlePrevious = () => {
-    if (currentIndex === 0) return;
-    setCurrentIndex((prev) => prev - 1);
+  const handleOpenTrack = (trackId: string) => {
+    setSelectedTrackId(trackId);
+    setSelectedQuestionId(null);
   };
 
-  const handleNext = () => {
-    if (currentIndex >= questions.length - 1) return;
-    setCurrentIndex((prev) => prev + 1);
-  };
-
-  const handleSubmitAnswer = async () => {
-    if (!currentQuestion) return;
-    if (!userId) {
-      setActionError("Please log in before submitting answers.");
-      return;
-    }
-
-    if (currentQuestion.type === "MCQ" && !selectedAnswer) {
-      setActionError("Select an answer before submitting.");
-      return;
-    }
-
-    if (currentQuestion.type === "CODE" && !codeAnswer.trim()) {
-      setActionError("Enter your code before submitting.");
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handleBackToTracks = () => {
+    setSelectedTrackId(null);
+    setSelectedQuestionId(null);
     setActionError(null);
+    setSubmitted(false);
+    setResult(null);
+    setSandboxResult(null);
+  };
 
-    try {
-      const payload: Record<string, unknown> = { userId };
-      if (currentQuestion.type === "MCQ") {
-        payload.selectedOption = selectedAnswer;
-      } else {
-        payload.code = codeAnswer;
-      }
+  const handleOpenQuestion = (questionId: string) => {
+    setSelectedQuestionId(questionId);
+  };
 
-      const res = await fetch(`/api/questions/${currentQuestion.id}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.message || "Failed to submit answer");
-      }
-
-      setResult({
-        isCorrect: data.data.isCorrect,
-        score: data.data.score,
-        codeExecutionResult: data.data.codeExecutionResult,
-      });
-      setSandboxResult(data.data.codeExecutionResult || null);
-      setSubmitted(true);
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Submission failed");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleBackToQuestionList = () => {
+    setSelectedQuestionId(null);
+    setActionError(null);
+    setSubmitted(false);
+    setResult(null);
+    setSandboxResult(null);
   };
 
   const handleRunSandbox = async () => {
-    if (!currentQuestion || currentQuestion.type !== "CODE") return;
-    if (!codeAnswer.trim()) {
-      setActionError("Enter some code before running the sandbox.");
+    if (!selectedQuestion || !codeAnswer.trim()) {
+      setActionError("Add code before running sandbox.");
       return;
     }
 
@@ -333,7 +485,7 @@ export default function PracticePage() {
     setActionError(null);
 
     try {
-      const res = await fetch(`/api/questions/${currentQuestion.id}/run`, {
+      const res = await fetch(`/api/questions/${selectedQuestion.id}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: codeAnswer }),
@@ -353,368 +505,394 @@ export default function PracticePage() {
     }
   };
 
+  const handleSubmitAnswer = async () => {
+    if (!selectedQuestion || !codeAnswer.trim()) {
+      setActionError("Add code before submitting.");
+      return;
+    }
+
+    if (!userId) {
+      setActionError("Please log in before submitting.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setActionError(null);
+
+    try {
+      const res = await fetch(`/api/questions/${selectedQuestion.id}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, code: codeAnswer }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Submission failed");
+      }
+
+      setResult({
+        isCorrect: data.data.isCorrect,
+        score: data.data.score,
+        codeExecutionResult: data.data.codeExecutionResult,
+      });
+      setSandboxResult(data.data.codeExecutionResult || null);
+      setSubmitted(true);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Submission failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
-      <PracticeLayout>
-        <div className="flex h-full items-center justify-center">
-          <Loader className="w-10 h-10 animate-spin text-primary" />
+      <ProtectedRoute>
+        <div className="min-h-screen bg-[#05070d] text-slate-100">
+          <Navbar />
+          <div className="flex h-[70vh] items-center justify-center">
+            <Loader className="h-10 w-10 animate-spin text-cyan-300" />
+          </div>
         </div>
-      </PracticeLayout>
+      </ProtectedRoute>
     );
   }
 
-  if (error || !currentQuestion) {
+  if (error) {
     return (
-      <PracticeLayout>
-        <div className="max-w-3xl mx-auto p-4 md:p-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Practice unavailable</CardTitle>
-              <CardDescription>
-                {error ||
-                  "We could not load any questions right now. Try again later."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {userId
-                    ? "Refresh the page or check your connection."
-                    : "Please log in to unlock the practice workflow."}
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => window.location.reload()}
-                >
-                  Reload
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      <ProtectedRoute>
+        <div className="min-h-screen bg-[#05070d] text-slate-100">
+          <Navbar />
+          <div className="mx-auto max-w-2xl px-4 py-12 md:px-8">
+            <Card className="border-red-400/30 bg-red-500/10">
+              <CardHeader>
+                <CardTitle className="text-red-200">Could not load practice data</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-red-100">{error}</CardContent>
+            </Card>
+          </div>
         </div>
-      </PracticeLayout>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <PracticeLayout>
-      <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-3 text-sm">
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-              <div>
-                <p className="text-muted-foreground text-xs">MCQ Challenges</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {mcqCount}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#05070d] text-slate-100">
+        <Navbar />
+        <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8 md:py-12">
+          {!selectedTrack && (
+            <>
+              <section className="mb-10">
+                <p className="text-xs uppercase tracking-[0.22em] text-cyan-300/80">Practice Arena</p>
+                <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-50 md:text-5xl">
+                  Learn DSA With Structured Tracks
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm text-slate-400 md:text-base">
+                  Choose a topic track. After selecting a track, you will see only coding questions
+                  related to that topic and can open each one in the coding interface.
                 </p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-3 text-sm">
-              <MemoryStick className="w-5 h-5 text-sky-500" />
-              <div>
-                <p className="text-muted-foreground text-xs">Code Challenges</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {codeCount}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-3 text-sm">
-              <Clock3 className="w-5 h-5 text-primary" />
-              <div>
-                <p className="text-muted-foreground text-xs">Difficulty</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {currentQuestion.difficulty}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+              </section>
 
-        <div className="rounded-xl border border-border bg-card p-4 md:p-5">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-sm font-medium text-muted-foreground">
-              Question {currentIndex + 1} of {questions.length}
-            </span>
-            <span className="text-sm font-medium text-muted-foreground">
-              {Math.round(((currentIndex + 1) / questions.length) * 100)}%
-            </span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-linear-to-r from-primary to-secondary h-2 rounded-full transition-all"
-              style={{
-                width: `${((currentIndex + 1) / questions.length) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        <Card className="border-border/80 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <CardTitle className="text-2xl mb-2 text-foreground">
-                  {currentQuestion.title}
-                </CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  {currentQuestion.description}
-                </CardDescription>
-              </div>
-              <Badge
-                variant={
-                  currentQuestion.difficulty === "Easy"
-                    ? "secondary"
-                    : currentQuestion.difficulty === "Medium"
-                      ? "default"
-                      : "destructive"
-                }
-              >
-                {currentQuestion.difficulty}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {currentQuestion.type === "MCQ" && (
-              <div className="space-y-3">
-                {currentQuestion.mcqOptions?.map((option) => (
-                  <label
-                    key={option.id}
-                    className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
-                      selectedAnswer === option.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-muted/20 hover:border-primary/60 hover:bg-muted/40"
-                    } ${submitted ? "opacity-80 cursor-not-allowed" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      name="mcq"
-                      value={option.id}
-                      checked={selectedAnswer === option.id}
-                      onChange={(event) =>
-                        setSelectedAnswer(event.target.value)
-                      }
-                      disabled={submitted}
-                      className="w-4 h-4 accent-primary"
-                    />
-                    <span className="text-foreground">{option.text}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {currentQuestion.type === "CODE" && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
-                  <div className="xl:col-span-2 space-y-4">
-                    <div className="rounded-lg border border-border bg-muted/30 p-4">
-                      <h4 className="text-sm font-semibold text-foreground mb-2">
-                        Problem Details
-                      </h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {currentQuestion.description}
-                      </p>
-                      <div className="mt-3 flex items-center gap-2">
-                        <Badge variant="outline">
-                          {currentQuestion.codeChallenge?.language?.toUpperCase() ||
-                            "CPP"}
-                        </Badge>
-                        <Badge variant="secondary">
-                          {currentQuestion.difficulty}
-                        </Badge>
+              <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {tracks.map((track) => {
+                  const Icon = track.icon;
+                  return (
+                    <article
+                      key={track.id}
+                      className={`group overflow-hidden rounded-2xl border bg-slate-950/85 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_40px_rgba(0,0,0,0.45)] ${track.borderClass} ${track.hoverClass}`}
+                    >
+                      <div className={`h-24 bg-linear-to-r ${track.headerGradientClass}`}>
+                        <div className="flex h-full items-center justify-center">
+                          <Icon className="h-8 w-8 text-slate-200/90" />
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="rounded-lg border border-border bg-card p-4">
-                      <h4 className="text-sm font-semibold text-foreground mb-2">
-                        Example Test Cases
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        {(currentQuestion.codeChallenge?.testCases || [])
-                          .filter((testCase) => testCase.visible !== false)
-                          .map((testCase, idx) => (
-                            <div
-                              key={idx}
-                              className="rounded border border-border bg-muted/30 p-2"
-                            >
-                              <p className="text-muted-foreground text-xs">
-                                <strong>Input:</strong> {testCase.input}
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                <strong>Expected:</strong> {testCase.output}
-                              </p>
-                            </div>
-                          ))}
+                      <div className="space-y-3 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="text-lg font-semibold text-slate-50">{track.title}</h3>
+                          <Badge variant="outline" className={levelStyles[track.level]}>
+                            {track.level}
+                          </Badge>
+                        </div>
+                        <p className="line-clamp-3 text-sm leading-relaxed text-slate-400">
+                          {track.description}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {track.modules} modules | {track.problems} problems
+                        </p>
+                        <Button
+                          variant="ghost"
+                          className="h-9 w-full justify-between border border-slate-800 bg-slate-900/70 text-slate-200 hover:bg-slate-800/80"
+                          onClick={() => handleOpenTrack(track.id)}
+                        >
+                          Start Track
+                          <ArrowUpRight className="h-4 w-4" />
+                        </Button>
                       </div>
-                    </div>
-                  </div>
+                    </article>
+                  );
+                })}
+              </section>
+            </>
+          )}
 
-                  <div className="xl:col-span-3 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-foreground">
-                        IDE
-                      </label>
-                      <span className="text-xs text-muted-foreground">
-                        Powered by Monaco + Judge0 Sandbox
-                      </span>
-                    </div>
-                    <div className="rounded-lg overflow-hidden border border-border">
-                      <MonacoEditor
-                        key={currentQuestion.id}
-                        height="420px"
-                        language={getMonacoLanguage(
-                          currentQuestion.codeChallenge?.language,
-                        )}
-                        theme="vs-dark"
-                        value={codeAnswer}
-                        onChange={(value) => {
-                          setCodeAnswer(value || "");
-                          setSandboxResult(null);
-                          setActionError(null);
-                        }}
-                        options={{
-                          minimap: { enabled: false },
-                          fontSize: 14,
-                          lineNumbers: "on",
-                          scrollBeyondLastLine: false,
-                          automaticLayout: true,
-                          tabSize: 2,
-                          wordWrap: "on",
-                          padding: { top: 12 },
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {!submitted && sandboxResult && (
-                  <div className="rounded-lg border border-primary/40 bg-primary/10 p-4">
-                    <p className="text-sm font-semibold text-primary">
-                      Sandbox Preview
-                    </p>
-                    <p className="text-xs text-primary/90 mt-1">
-                      This run checks your code without locking the final
-                      submission.
-                    </p>
-                    <SandboxResultsPanel codeExecutionResult={sandboxResult} />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {actionError && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                {actionError}
-              </div>
-            )}
-
-            {submitted && result && (
-              <div
-                className={`p-4 rounded-lg ${
-                  result.isCorrect
-                    ? "bg-emerald-500/10 border border-emerald-500/30"
-                    : "bg-destructive/10 border border-destructive/30"
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  {result.isCorrect ? (
-                    <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-                  ) : (
-                    <XCircle className="w-6 h-6 text-destructive" />
-                  )}
-                  <span className="font-bold text-foreground">
-                    {result.isCorrect ? "Correct!" : "Try again"}
-                  </span>
-                </div>
-                <p className="text-sm text-foreground">
-                  You earned <strong>{result.score} points</strong>
-                </p>
-                <SandboxResultsPanel
-                  codeExecutionResult={result.codeExecutionResult}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentIndex === 0}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleNext}
-              disabled={currentIndex === questions.length - 1}
-            >
-              Next
-            </Button>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {currentQuestion.type === "CODE" && (
+          {selectedTrack && !selectedQuestion && (
+            <section className="space-y-6">
               <Button
                 variant="outline"
-                onClick={handleRunSandbox}
-                disabled={isRunningSandbox || !codeAnswer.trim()}
-                size="lg"
+                className="border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
+                onClick={handleBackToTracks}
               >
-                {isRunningSandbox ? (
-                  <>
-                    <Loader className="w-4 h-4 mr-2 animate-spin" />
-                    Running...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Run in Sandbox
-                  </>
-                )}
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Tracks
               </Button>
-            )}
-            <Button
-              onClick={handleSubmitAnswer}
-              disabled={
-                isSubmitting ||
-                (currentQuestion.type === "MCQ" && !selectedAnswer) ||
-                (currentQuestion.type === "CODE" && !codeAnswer.trim())
-              }
-              size="lg"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader className="w-4 h-4 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Answer"
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
+                <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80">Selected Track</p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-100">{selectedTrack.title}</h2>
+                <p className="mt-2 text-sm text-slate-400">{selectedTrack.description}</p>
+              </div>
+
+              {!trackHasStrictMatches && (
+                <div className="rounded-lg border border-amber-400/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+                  No coding questions are mapped to this topic yet.
+                </div>
               )}
-            </Button>
-            {submitted && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setSubmitted(false);
-                  setResult(null);
-                  setActionError(null);
-                  setSandboxResult(null);
-                  setSelectedAnswer("");
-                  setCodeAnswer(getInitialCode(currentQuestion));
-                }}
-              >
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
+
+              {filteredQuestions.length === 0 ? (
+                <Card className="border-slate-800 bg-slate-950/85">
+                  <CardContent className="py-10 text-center">
+                    <p className="text-sm text-slate-300">
+                      No questions found for <strong>{selectedTrack.title}</strong>.
+                    </p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Add topic-specific coding questions in related modules to populate this track.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {filteredQuestions.map((question, index) => (
+                    <Card
+                      key={question.id}
+                      className="border-slate-800 bg-slate-950/85 shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
+                    >
+                      <CardHeader className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-slate-500">Q{index + 1}</p>
+                          <Badge variant="outline" className="border-slate-700 text-slate-300">
+                            {question.difficulty}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-lg text-slate-100">{question.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="mb-4 line-clamp-2 text-sm text-slate-400">{question.description}</p>
+                        <Button
+                          className="w-full bg-cyan-600 text-white hover:bg-cyan-500"
+                          onClick={() => handleOpenQuestion(question.id)}
+                        >
+                          Open Coding Interface
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {selectedTrack && selectedQuestion && (
+            <section className="space-y-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
+                  onClick={handleBackToQuestionList}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Question List
+                </Button>
+                <Badge variant="outline" className="border-slate-700 text-slate-300">
+                  {selectedTrack.title}
+                </Badge>
+              </div>
+
+              <Card className="border-slate-800 bg-slate-950/90">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <CardTitle className="text-2xl text-slate-100">{selectedQuestion.title}</CardTitle>
+                      <p className="mt-2 text-sm text-slate-400">{selectedQuestion.description}</p>
+                    </div>
+                    <Badge variant="outline" className="border-slate-700 text-slate-300">
+                      {selectedQuestion.difficulty}
+                    </Badge>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
+                    <div className="space-y-4 xl:col-span-2">
+                      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                        <h4 className="text-sm font-semibold text-slate-100">Problem Details</h4>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                          {selectedQuestion.description}
+                        </p>
+                      </div>
+
+                      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                        <h4 className="mb-2 text-sm font-semibold text-slate-100">Visible Test Cases</h4>
+                        <div className="space-y-2">
+                          {(selectedQuestion.codeChallenge?.testCases || [])
+                            .filter((testCase) => testCase.visible !== false)
+                            .map((testCase, idx) => (
+                              <div
+                                key={idx}
+                                className="rounded-md border border-slate-700 bg-slate-900/80 p-2 text-xs text-slate-300"
+                              >
+                                <p>
+                                  <strong>Input:</strong> {testCase.input}
+                                </p>
+                                <p>
+                                  <strong>Expected:</strong> {testCase.output}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 xl:col-span-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-slate-200">Coding IDE</p>
+                        <span className="text-xs text-slate-400">
+                          Monaco + Judge0 Sandbox
+                        </span>
+                      </div>
+
+                      <div className="overflow-hidden rounded-lg border border-slate-700">
+                        <MonacoEditor
+                          key={selectedQuestion.id}
+                          height="420px"
+                          language={getMonacoLanguage(selectedQuestion.codeChallenge?.language)}
+                          theme="vs-dark"
+                          value={codeAnswer}
+                          onChange={(value) => {
+                            setCodeAnswer(value || "");
+                            setSandboxResult(null);
+                            setActionError(null);
+                          }}
+                          options={{
+                            minimap: { enabled: false },
+                            fontSize: 14,
+                            lineNumbers: "on",
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                            tabSize: 2,
+                            wordWrap: "on",
+                            padding: { top: 12 },
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {actionError && (
+                    <div className="rounded-lg border border-red-500/35 bg-red-500/10 p-3 text-sm text-red-200">
+                      {actionError}
+                    </div>
+                  )}
+
+                  {!submitted && sandboxResult && (
+                    <div className="rounded-lg border border-cyan-400/35 bg-cyan-500/10 p-4">
+                      <p className="mb-3 text-sm font-semibold text-cyan-200">Sandbox Preview</p>
+                      <SandboxResultsPanel codeExecutionResult={sandboxResult} />
+                    </div>
+                  )}
+
+                  {submitted && result && (
+                    <div
+                      className={`rounded-lg border p-4 ${
+                        result.isCorrect
+                          ? "border-emerald-500/35 bg-emerald-500/10"
+                          : "border-red-500/35 bg-red-500/10"
+                      }`}
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        {result.isCorrect ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-400" />
+                        )}
+                        <span className="font-medium text-slate-100">
+                          {result.isCorrect ? "Correct" : "Incorrect"}
+                        </span>
+                      </div>
+                      <p className="mb-3 text-sm text-slate-200">
+                        Score earned: <strong>{result.score}</strong>
+                      </p>
+                      <SandboxResultsPanel codeExecutionResult={result.codeExecutionResult} />
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      className="border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
+                      disabled={isRunningSandbox || !codeAnswer.trim()}
+                      onClick={handleRunSandbox}
+                    >
+                      {isRunningSandbox ? (
+                        <>
+                          <Loader className="mr-2 h-4 w-4 animate-spin" />
+                          Running...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="mr-2 h-4 w-4" />
+                          Run in Sandbox
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      className="bg-cyan-600 text-white hover:bg-cyan-500"
+                      disabled={isSubmitting || !codeAnswer.trim()}
+                      onClick={handleSubmitAnswer}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit Answer"
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="text-slate-300 hover:bg-slate-800"
+                      onClick={() => {
+                        setSubmitted(false);
+                        setResult(null);
+                        setSandboxResult(null);
+                        setActionError(null);
+                        setCodeAnswer(getInitialCode(selectedQuestion));
+                      }}
+                    >
+                      Reset Code
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+        </main>
       </div>
-    </PracticeLayout>
+    </ProtectedRoute>
   );
 }

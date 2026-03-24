@@ -6,13 +6,25 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const moduleId = searchParams.get("moduleId");
+    const moduleIdsParam = searchParams.get("moduleIds");
     const type = searchParams.get("type");
     const difficulty = searchParams.get("difficulty");
     const limit = searchParams.get("limit") || "10";
 
     const whereClause: any = {};
 
-    if (moduleId) whereClause.moduleId = moduleId;
+    if (moduleIdsParam) {
+      const moduleIds = moduleIdsParam
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+
+      if (moduleIds.length > 0) {
+        whereClause.moduleId = { in: moduleIds };
+      }
+    } else if (moduleId) {
+      whereClause.moduleId = moduleId;
+    }
     if (type) whereClause.type = type;
     if (difficulty) whereClause.difficulty = difficulty;
 
