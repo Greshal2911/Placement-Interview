@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/shared/navbar";
 import { ModuleCard } from "@/components/shared/module-card";
@@ -177,11 +177,9 @@ export default function DashboardPage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         Pick up where you left off
                       </p>
-                      <Button variant="outline" className="w-full" asChild>
-                        <Link href="/modules">
-                          View Modules <ArrowRight className="w-4 h-4 ml-2" />
-                        </Link>
-                      </Button>
+                      <Link href="/modules" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+                        View Modules <ArrowRight className="w-4 h-4 ml-2" />
+                      </Link>
                     </CardContent>
                   </Card>
 
@@ -196,11 +194,9 @@ export default function DashboardPage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         Practice MCQs and code challenges
                       </p>
-                      <Button variant="outline" className="w-full" asChild>
-                        <Link href="/practice">
-                          Start Practice <ArrowRight className="w-4 h-4 ml-2" />
-                        </Link>
-                      </Button>
+                      <Link href="/practice" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+                        Start Practice <ArrowRight className="w-4 h-4 ml-2" />
+                      </Link>
                     </CardContent>
                   </Card>
 
@@ -215,12 +211,10 @@ export default function DashboardPage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         Face an AI-powered interview
                       </p>
-                      <Button variant="outline" className="w-full" asChild>
-                        <Link href="/interview">
-                          Start Interview{" "}
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Link>
-                      </Button>
+                      <Link href="/interview" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+                        Start Interview{" "}
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Link>
                     </CardContent>
                   </Card>
                 </div>

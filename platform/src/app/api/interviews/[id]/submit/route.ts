@@ -30,7 +30,7 @@ export async function POST(
       return errorResponse("Interview is not in progress", undefined, 400);
     }
 
-    const qnaLog = Array.isArray(interview.qnaLog) ? interview.qnaLog : [];
+    const qnaLog = (Array.isArray(interview.qnaLog) ? interview.qnaLog : []) as any[];
     const currentQuestion = qnaLog[questionIndex];
 
     if (!currentQuestion) {
@@ -68,7 +68,7 @@ export async function POST(
     let updatedInterview = await prisma.interview.update({
       where: { id: interviewId },
       data: {
-        qnaLog: updatedQnaLog,
+        qnaLog: updatedQnaLog as any,
       },
       include: { module: true },
     });

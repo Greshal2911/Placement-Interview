@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         moduleId,
         status: "IN_PROGRESS",
         startedAt: new Date(),
-        qnaLog: interviewQuestions,
+        qnaLog: interviewQuestions as any,
       },
     });
 

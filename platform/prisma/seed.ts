@@ -1,6 +1,6 @@
 import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -8,9 +8,10 @@ if (!databaseUrl) {
   throw new Error("DATABASE_URL must be provided");
 }
 
+const adapter = new PrismaPg({ connectionString: databaseUrl });
 const prisma = new PrismaClient({
   log: ["error", "info"],
-  adapter: new PrismaNeon({ connectionString: databaseUrl }),
+  adapter,
 });
 
 type SeedModule = {

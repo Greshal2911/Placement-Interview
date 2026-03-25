@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
 import { validateLoginForm, ValidationError } from "@/lib/validation";
@@ -161,9 +161,9 @@ export default function LoginPage() {
             </div>
 
             {/* Register Link */}
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/auth/register">Create Account</Link>
-            </Button>
+            <Link href="/auth/register" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+              Create Account
+            </Link>
           </CardContent>
         </Card>
 

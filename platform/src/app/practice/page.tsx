@@ -439,6 +439,15 @@ export default function PracticePage() {
     [filteredQuestions, selectedQuestionId],
   );
 
+  const nextQuestionId = useMemo(() => {
+    if (!selectedQuestion) return null;
+    const currentIndex = filteredQuestions.findIndex((q) => q.id === selectedQuestion.id);
+    if (currentIndex >= 0 && currentIndex < filteredQuestions.length - 1) {
+      return filteredQuestions[currentIndex + 1].id;
+    }
+    return null;
+  }, [filteredQuestions, selectedQuestion]);
+
   useEffect(() => {
     if (!selectedQuestion) return;
 
@@ -835,43 +844,59 @@ export default function PracticePage() {
                         Score earned: <strong>{result.score}</strong>
                       </p>
                       <SandboxResultsPanel codeExecutionResult={result.codeExecutionResult} />
+                      
+                      {result.isCorrect && nextQuestionId && (
+                        <div className="mt-4 flex justify-end">
+                          <Button
+                            className="bg-emerald-600 text-white hover:bg-emerald-500"
+                            onClick={() => handleOpenQuestion(nextQuestionId)}
+                          >
+                            Next Question
+                            <ArrowUpRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
 
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      className="border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
-                      disabled={isRunningSandbox || !codeAnswer.trim()}
-                      onClick={handleRunSandbox}
-                    >
-                      {isRunningSandbox ? (
-                        <>
-                          <Loader className="mr-2 h-4 w-4 animate-spin" />
-                          Running...
-                        </>
-                      ) : (
-                        <>
-                          <Play className="mr-2 h-4 w-4" />
-                          Run in Sandbox
-                        </>
-                      )}
-                    </Button>
+                    {!(submitted && result?.isCorrect) && (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
+                          disabled={isRunningSandbox || !codeAnswer.trim()}
+                          onClick={handleRunSandbox}
+                        >
+                          {isRunningSandbox ? (
+                            <>
+                              <Loader className="mr-2 h-4 w-4 animate-spin" />
+                              Running...
+                            </>
+                          ) : (
+                            <>
+                              <Play className="mr-2 h-4 w-4" />
+                              Run in Sandbox
+                            </>
+                          )}
+                        </Button>
 
-                    <Button
-                      className="bg-cyan-600 text-white hover:bg-cyan-500"
-                      disabled={isSubmitting || !codeAnswer.trim()}
-                      onClick={handleSubmitAnswer}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader className="mr-2 h-4 w-4 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Submit Answer"
-                      )}
-                    </Button>
+                        <Button
+                          className="bg-cyan-600 text-white hover:bg-cyan-500"
+                          disabled={isSubmitting || !codeAnswer.trim()}
+                          onClick={handleSubmitAnswer}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader className="mr-2 h-4 w-4 animate-spin" />
+                              Submitting...
+                            </>
+                          ) : (
+                            "Submit Answer"
+                          )}
+                        </Button>
+                      </>
+                    )}
 
                     <Button
                       variant="ghost"

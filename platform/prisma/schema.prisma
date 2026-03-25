@@ -1,45 +1,39 @@
 generator client {
   provider = "prisma-client-js"
-  engine = "prisma"
+  engine   = "prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-// ==================== USER MODELS ====================
-
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String?  // Optional if using OAuth
-  role      String   @default("student") // student, admin
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  progress       Progress[]
+  id             String           @id @default(cuid())
+  email          String           @unique
+  name           String
+  password       String?
+  role           String           @default("student")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   interviews     Interview[]
-  userAnswers    UserAnswer[]
   moduleProgress ModuleProgress[]
+  progress       Progress?
+  userAnswers    UserAnswer[]
 
   @@index([email])
 }
 
-// ==================== LEARNING STRUCTURE ====================
-
 model Module {
-  id          String   @id @default(cuid())
-  title       String   @unique
+  id          String           @id @default(cuid())
+  title       String           @unique
   description String
-  order       Int      @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  concepts  Concept[]
-  questions Question[]
-  progress  ModuleProgress[]
-  interviews Interview[]
+  order       Int              @unique
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  concepts    Concept[]
+  interviews  Interview[]
+  progress    ModuleProgress[]
+  questions   Question[]
 
   @@index([order])
 }
@@ -48,46 +42,33 @@ model Concept {
   id          String   @id @default(cuid())
   title       String
   description String
-  content     String?  // Detailed explanation/notes
+  content     String?
   order       Int
   moduleId    String
-  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@index([moduleId])
 }
 
-// ==================== QUESTIONS & CHALLENGES ====================
-
 model Question {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  type        QuestionType
-  moduleId    String
-  module      Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  difficulty  String  @default("Medium") // Easy, Medium, Hard
-  order       Int?
-
-  // MCQ specific
-  mcqOptions  MCQOption[]
-
-  // Code challenge specific
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  type          QuestionType
+  moduleId      String
+  difficulty    String         @default("Medium")
+  order         Int?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   codeChallenge CodeChallenge?
-
-  // User responses
-  userAnswers UserAnswer[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  mcqOptions    MCQOption[]
+  module        Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  userAnswers   UserAnswer[]
 
   @@index([moduleId])
   @@index([type])
-}
-
-enum QuestionType {
-  MCQ
-  CODE
 }
 
 model MCQOption {
@@ -102,56 +83,47 @@ model MCQOption {
 }
 
 model CodeChallenge {
-  id         String   @id @default(cuid())
-  title      String
-  language   String   @default("cpp") // cpp, c, python
-  boilerplate String? // Initial code
-  testCases  Json     // [{ input: string, output: string, visible: boolean }]
-  questionId String   @unique
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  language    String   @default("cpp")
+  boilerplate String?
+  testCases   Json
+  questionId  String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model UserAnswer {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  questionId String
-  question  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  
-  // For MCQ
+  id             String   @id @default(cuid())
+  userId         String
+  questionId     String
   selectedOption String?
-  
-  // For Code
-  code      String?
-  output    String?
-  
-  isCorrect Boolean
-  score     Int      @default(0)
-  createdAt DateTime @default(now())
+  code           String?
+  output         String?
+  isCorrect      Boolean
+  score          Int      @default(0)
+  createdAt      DateTime @default(now())
+  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, questionId])
   @@index([userId])
 }
 
-// ==================== PROGRESS TRACKING ====================
-
 model ModuleProgress {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  moduleId  String
-  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  
-  completed Boolean  @default(false)
-  completedAt DateTime?
-  score     Int      @default(0)
-  questionsAttempted Int @default(0)
-  questionsCorrect   Int @default(0)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  userId             String
+  moduleId           String
+  completed          Boolean   @default(false)
+  completedAt        DateTime?
+  score              Int       @default(0)
+  questionsAttempted Int       @default(0)
+  questionsCorrect   Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  module             Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, moduleId])
   @@index([userId])
@@ -159,46 +131,41 @@ model ModuleProgress {
 }
 
 model Progress {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  totalQuestionsAttempted Int @default(0)
-  totalCorrect            Int @default(0)
-  overallScore            Int @default(0)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  totalQuestionsAttempted Int      @default(0)
+  totalCorrect            Int      @default(0)
+  overallScore            Int      @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId])
   @@index([userId])
 }
 
-// ==================== INTERVIEW SYSTEM ====================
-
 model Interview {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  moduleId  String
-  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  
-  status    InterviewStatus @default(PENDING) // PENDING, IN_PROGRESS, COMPLETED
-  score     Int?
-  feedback  String?
-  startedAt DateTime?
+  id          String          @id @default(cuid())
+  userId      String
+  moduleId    String
+  status      InterviewStatus @default(PENDING)
+  score       Int?
+  feedback    String?
+  startedAt   DateTime?
   completedAt DateTime?
-  
-  // Interview Q&A stored as JSON
-  // [{ question: string, userResponse: string, geminiEvaluation: string, score: int }]
-  qnaLog    Json     @default("[]")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  qnaLog      Json            @default("[]")
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  module      Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([moduleId])
   @@index([status])
+}
+
+enum QuestionType {
+  MCQ
+  CODE
 }
 
 enum InterviewStatus {
@@ -207,4 +174,3 @@ enum InterviewStatus {
   COMPLETED
   ABANDONED
 }
-
