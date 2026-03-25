@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  engine   = "prisma"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -23,19 +23,34 @@ model User {
   @@index([email])
 }
 
+model Subject {
+  id          String   @id @default(cuid())
+  title       String   @unique
+  description String
+  order       Int      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  modules     Module[]
+
+  @@index([order])
+}
+
 model Module {
   id          String           @id @default(cuid())
   title       String           @unique
   description String
-  order       Int              @unique
+  order       Int
+  subjectId   String
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  subject     Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   concepts    Concept[]
   interviews  Interview[]
   progress    ModuleProgress[]
   questions   Question[]
 
-  @@index([order])
+  @@unique([subjectId, order])
+  @@index([subjectId])
 }
 
 model Concept {

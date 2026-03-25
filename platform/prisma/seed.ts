@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/client";
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -379,9 +379,34 @@ async function main() {
   await prisma.progress.deleteMany();
   await prisma.concept.deleteMany();
   await prisma.module.deleteMany();
+  await prisma.subject.deleteMany();
   await prisma.user.deleteMany();
 
   console.log("Cleared existing data");
+
+  // Create Subjects
+  const dsaSubject = await prisma.subject.create({
+    data: {
+      title: "Data Structures & Algorithms",
+      description: "Master problem solving and core data structures. Complete modules and AI interview.",
+      order: 1,
+    }
+  });
+  const osSubject = await prisma.subject.create({
+    data: {
+      title: "Operating Systems",
+      description: "Conceptual and architectural understanding of OS.",
+      order: 2,
+    }
+  });
+  const dbmsSubject = await prisma.subject.create({
+    data: {
+      title: "Database Management Systems",
+      description: "SQL, relational models, and database design.",
+      order: 3,
+    }
+  });
+  console.log("Created subjects");
 
   const moduleMap = new Map<string, string>();
 
@@ -391,6 +416,11 @@ async function main() {
         title: seedModule.title,
         description: seedModule.description,
         order: seedModule.order,
+        subject: {
+          connect: {
+            id: dsaSubject.id,
+          },
+        },
       },
     });
 

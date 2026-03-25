@@ -177,8 +177,8 @@ export default function DashboardPage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         Pick up where you left off
                       </p>
-                      <Link href="/modules" className={buttonVariants({ variant: "outline", className: "w-full" })}>
-                        View Modules <ArrowRight className="w-4 h-4 ml-2" />
+                      <Link href="/subjects" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+                        View Subjects <ArrowRight className="w-4 h-4 ml-2" />
                       </Link>
                     </CardContent>
                   </Card>
