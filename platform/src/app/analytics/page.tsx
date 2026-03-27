@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -70,6 +70,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
+  const lastFallbackRef = useRef(0);
 
   const fetchAnalytics = useCallback(
     async (showLoader: boolean) => {
@@ -109,9 +110,59 @@ export default function AnalyticsPage() {
 
     fetchAnalytics(true);
 
-    const pollId = window.setInterval(() => {
-      fetchAnalytics(false);
-    }, 15000);
+    let pollId: number | null = null;
+    let stream: EventSource | null = null;
+
+    const stopPolling = () => {
+      if (pollId !== null) {
+        window.clearInterval(pollId);
+        pollId = null;
+      }
+    };
+
+    const startPolling = () => {
+      if (pollId === null) {
+        pollId = window.setInterval(() => {
+          fetchAnalytics(false);
+        }, 15000);
+      }
+    };
+
+    const maybeRunFallbackFetch = () => {
+      const now = Date.now();
+      if (now - lastFallbackRef.current > 5000) {
+        lastFallbackRef.current = now;
+        fetchAnalytics(false);
+      }
+    };
+
+    if (typeof window !== "undefined" && "EventSource" in window) {
+      stream = new EventSource(`/api/analytics/${user.id}/stream`);
+
+      stream.onopen = () => {
+        stopPolling();
+        setApiError(null);
+      };
+
+      stream.addEventListener("analytics", (event) => {
+        try {
+          const payload = JSON.parse((event as MessageEvent).data) as AnalyticsPayload;
+          setAnalytics(payload);
+          setApiError(null);
+          setLoading(false);
+        } catch {
+          setApiError("Received invalid analytics stream payload");
+        }
+      });
+
+      stream.addEventListener("error", () => {
+        setApiError("Live analytics stream interrupted. Falling back to background refresh.");
+        startPolling();
+        maybeRunFallbackFetch();
+      });
+    } else {
+      startPolling();
+    }
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
@@ -127,7 +178,10 @@ export default function AnalyticsPage() {
     window.addEventListener("focus", handleFocus);
 
     return () => {
-      window.clearInterval(pollId);
+      if (stream) {
+        stream.close();
+      }
+      stopPolling();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleFocus);
     };

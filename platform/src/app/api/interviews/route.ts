@@ -22,19 +22,6 @@ export async function POST(request: NextRequest) {
       return errorResponse("Module not found", undefined, 404);
     }
 
-    // Check if user has completed the module's questions first
-    const moduleProgress = await prisma.moduleProgress.findUnique({
-      where: { userId_moduleId: { userId, moduleId } },
-    });
-
-    if (!moduleProgress || moduleProgress.questionsCorrect < 3) {
-      return errorResponse(
-        "Complete at least 3 questions in this module before starting interview",
-        undefined,
-        403
-      );
-    }
-
     // Generate interview questions using Gemini
     const conceptNames = module.concepts.map((c) => c.title);
     const interviewQuestions = await generateInterviewQuestions(

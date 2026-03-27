@@ -1,7 +1,32 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
-import { evaluateAnswer, generateFollowUpQuestion } from "@/lib/gemini";
+import { evaluateAnswer } from "@/lib/gemini";
+
+function computeScoreFromQna(qnaLog: unknown): number {
+  const rows = Array.isArray(qnaLog) ? qnaLog : [];
+  const scored = rows
+    .map((row) => {
+      if (typeof row !== "object" || row === null) {
+        return null;
+      }
+
+      const evaluation = (row as { evaluation?: { score?: number } }).evaluation;
+      if (!evaluation || typeof evaluation.score !== "number") {
+        return null;
+      }
+
+      return Math.max(0, Math.min(10, Math.round(evaluation.score)));
+    })
+    .filter((value): value is number => value !== null);
+
+  if (!scored.length) {
+    return 0;
+  }
+
+  const total = scored.reduce((acc, value) => acc + value, 0);
+  return Math.round(total / scored.length);
+}
 
 export async function POST(
   request: NextRequest,
@@ -52,16 +77,10 @@ export async function POST(
       evaluation,
     };
 
-    // Generate follow-up question if needed
+    // Move to next generated question only (fixed test length).
     let nextQuestion = null;
     if (questionIndex < qnaLog.length - 1) {
       nextQuestion = qnaLog[questionIndex + 1];
-    } else if (evaluation.followUpQuestion) {
-      nextQuestion = {
-        question: evaluation.followUpQuestion,
-        isFollowUp: true,
-      };
-      updatedQnaLog.push(nextQuestion);
     }
 
     // Update interview with new qnaLog
@@ -76,22 +95,15 @@ export async function POST(
     // Check if interview should end
     let isComplete = false;
     if (questionIndex === qnaLog.length - 1 && !nextQuestion) {
-      // Calculate total score
-      let totalScore = 0;
-      const allResponses = updatedQnaLog;
-      for (const item of allResponses) {
-        if (item.evaluation?.score) {
-          totalScore += item.evaluation.score;
-        }
-      }
+      const finalScore = computeScoreFromQna(updatedQnaLog);
 
       updatedInterview = await prisma.interview.update({
         where: { id: interviewId },
         data: {
           status: "COMPLETED",
           completedAt: new Date(),
-          score: Math.round(totalScore / allResponses.length),
-          feedback: `Interview completed. Total Score: ${Math.round(totalScore / allResponses.length)}/10`,
+          score: finalScore,
+          feedback: `Interview completed. Final score: ${finalScore}/10`,
         },
         include: { module: true },
       });
