@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { load as loadTfjsFaceDetector } from "@tensorflow-models/face-detection/dist/tfjs/detector";
 import * as tf from "@tensorflow/tfjs-core";
@@ -76,6 +76,14 @@ function formatTime(seconds: number) {
 }
 
 export default function InterviewTestPage() {
+  return (
+    <Suspense fallback={<InterviewTestPageFallback />}>
+      <InterviewTestPageContent />
+    </Suspense>
+  );
+}
+
+function InterviewTestPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -604,6 +612,18 @@ export default function InterviewTestPage() {
           </div>
         </div>
       )}
+    </InterviewLayout>
+  );
+}
+
+function InterviewTestPageFallback() {
+  return (
+    <InterviewLayout>
+      <Card>
+        <CardContent className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+          <Loader className="h-5 w-5 animate-spin" /> Preparing interview...
+        </CardContent>
+      </Card>
     </InterviewLayout>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,6 +17,14 @@ import { validateLoginForm, ValidationError } from "@/lib/validation";
 import { BookOpen, Loader, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageSkeleton />}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
@@ -181,6 +189,28 @@ export default function LoginPage() {
             testPassword123
           </code>
         </p>
+      </div>
+    </div>
+  );
+}
+
+function LoginPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-[#1a2a4a] flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-foreground">Loading...</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Preparing login page
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="h-10 rounded-md bg-muted/60 animate-pulse" />
+            <div className="h-10 rounded-md bg-muted/60 animate-pulse" />
+            <div className="h-11 rounded-md bg-muted/60 animate-pulse" />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

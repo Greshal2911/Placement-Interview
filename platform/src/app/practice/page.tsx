@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -303,6 +303,14 @@ function SandboxResultsPanel({
 }
 
 export default function PracticePage() {
+  return (
+    <Suspense fallback={<PracticePageFallback />}>
+      <PracticePageContent />
+    </Suspense>
+  );
+}
+
+function PracticePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -917,6 +925,19 @@ export default function PracticePage() {
             </section>
           )}
         </main>
+      </div>
+    </ProtectedRoute>
+  );
+}
+
+function PracticePageFallback() {
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#05070d] text-slate-100">
+        <Navbar />
+        <div className="flex h-[70vh] items-center justify-center">
+          <Loader className="h-10 w-10 animate-spin text-cyan-300" />
+        </div>
       </div>
     </ProtectedRoute>
   );

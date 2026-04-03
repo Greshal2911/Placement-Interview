@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/shared/navbar";
 import { ProtectedRoute } from "@/components/shared/protected-route";
@@ -36,6 +36,14 @@ const InterviewLayout = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function InterviewRulesPage() {
+  return (
+    <Suspense fallback={<InterviewRulesPageFallback />}>
+      <InterviewRulesPageContent />
+    </Suspense>
+  );
+}
+
+function InterviewRulesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -267,6 +275,18 @@ export default function InterviewRulesPage() {
           </div>
         </div>
       )}
+    </InterviewLayout>
+  );
+}
+
+function InterviewRulesPageFallback() {
+  return (
+    <InterviewLayout>
+      <Card>
+        <CardContent className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+          <Loader className="h-5 w-5 animate-spin" /> Loading rules...
+        </CardContent>
+      </Card>
     </InterviewLayout>
   );
 }
