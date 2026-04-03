@@ -1,23 +1,18 @@
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeonHttp } from "@prisma/adapter-neon";
-import type { HTTPQueryOptions } from "@neondatabase/serverless";
 
 declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL must be set for Prisma");
-}
-
 const createPrismaClient = () => {
-  const httpOptions: HTTPQueryOptions<false, false> = {};
+  const connectionString = `${process.env.DATABASE_URL}`;
+  const adapter = new PrismaPg({ connectionString });
 
   return new PrismaClient({
-    log: ["error", "warn"],
-    adapter: new PrismaNeonHttp(databaseUrl, httpOptions),
+    adapter,
+    log: ["error"],
   });
 };
 

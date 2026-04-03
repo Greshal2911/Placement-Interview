@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -189,7 +188,6 @@ export default function ProfilePage() {
             </div>
           </main>
         </div>
-      </div>
     </ProtectedRoute>
   );
 }

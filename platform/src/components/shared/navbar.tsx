@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import {
   BookOpen,
@@ -46,29 +46,18 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             {isAuthenticated &&
               navLinks.map((item) => (
-                <Button
-                  key={item.href}
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="px-4 py-2 rounded-full"
-                >
-                  <Link href={item.href}>{item.label}</Link>
-                </Button>
+                <Link key={item.href} href={item.href} className={buttonVariants({ variant: "ghost", size: "sm", className: "px-4 py-2 rounded-full" })}>
+                  {item.label}
+                </Link>
               ))}
 
             {isAuthenticated && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full px-4 py-2 flex items-center gap-1"
-                asChild
-              >
-                <Link href="/interview" className="flex items-center gap-2">
+              <Link href="/interview" className={buttonVariants({ variant: "outline", size: "sm", className: "rounded-full px-4 py-2 flex items-center gap-1" })}>
+                <span className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-primary" />
                   AI Interview
-                </Link>
-              </Button>
+                </span>
+              </Link>
             )}
           </div>
 
@@ -129,12 +118,12 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/auth/login">Sign In</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/auth/register">Sign Up</Link>
-              </Button>
+              <Link href="/auth/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                Sign In
+              </Link>
+              <Link href="/auth/register" className={buttonVariants({ size: "sm" })}>
+                Sign Up
+              </Link>
             </div>
           )}
         </div>
