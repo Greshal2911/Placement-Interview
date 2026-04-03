@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -92,7 +92,9 @@ type Track = {
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
-  loading: () => <div className="h-96 w-full animate-pulse rounded-lg bg-slate-900" />,
+  loading: () => (
+    <div className="h-96 w-full animate-pulse rounded-lg bg-slate-900" />
+  ),
 });
 
 const tracks: Track[] = [
@@ -109,7 +111,14 @@ const tracks: Track[] = [
     hoverClass: "hover:border-cyan-300/60",
     headerGradientClass: "from-cyan-500/30 to-teal-500/10",
     moduleKeywords: ["array", "string"],
-    keywords: ["array", "string", "subarray", "prefix", "window", "two pointer"],
+    keywords: [
+      "array",
+      "string",
+      "subarray",
+      "prefix",
+      "window",
+      "two pointer",
+    ],
   },
   {
     id: "linkedlist-stack-queue",
@@ -184,7 +193,13 @@ const tracks: Track[] = [
     hoverClass: "hover:border-cyan-300/60",
     headerGradientClass: "from-cyan-500/30 to-teal-500/10",
     moduleKeywords: ["recursion", "backtracking"],
-    keywords: ["recursion", "backtracking", "subset", "permutation", "combination"],
+    keywords: [
+      "recursion",
+      "backtracking",
+      "subset",
+      "permutation",
+      "combination",
+    ],
   },
   {
     id: "graphs",
@@ -199,7 +214,14 @@ const tracks: Track[] = [
     hoverClass: "hover:border-cyan-300/60",
     headerGradientClass: "from-cyan-500/30 to-teal-500/10",
     moduleKeywords: ["graph"],
-    keywords: ["graph", "shortest", "path", "dijkstra", "topological", "union find"],
+    keywords: [
+      "graph",
+      "shortest",
+      "path",
+      "dijkstra",
+      "topological",
+      "union find",
+    ],
   },
   {
     id: "dp",
@@ -259,7 +281,8 @@ function SandboxResultsPanel({
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-slate-200">Sandbox Test Results</span>
         <Badge variant="outline" className="bg-slate-900 text-slate-200">
-          {codeExecutionResult.passedCount} / {codeExecutionResult.totalCount} passed
+          {codeExecutionResult.passedCount} / {codeExecutionResult.totalCount}{" "}
+          passed
         </Badge>
       </div>
 
@@ -280,9 +303,13 @@ function SandboxResultsPanel({
                 ) : (
                   <XCircle className="h-4 w-4 text-red-400" />
                 )}
-                <span className="font-medium text-slate-100">Case {index + 1}</span>
+                <span className="font-medium text-slate-100">
+                  Case {index + 1}
+                </span>
               </div>
-              <span className="text-xs text-slate-300">{result.status.description}</span>
+              <span className="text-xs text-slate-300">
+                {result.status.description}
+              </span>
             </div>
             <div className="space-y-1 text-xs text-slate-300">
               <p>
@@ -302,7 +329,7 @@ function SandboxResultsPanel({
   );
 }
 
-export default function PracticePage() {
+function PracticePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -327,7 +354,8 @@ export default function PracticePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<SubmissionResult | null>(null);
-  const [sandboxResult, setSandboxResult] = useState<CodeExecutionResult | null>(null);
+  const [sandboxResult, setSandboxResult] =
+    useState<CodeExecutionResult | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -358,7 +386,9 @@ export default function PracticePage() {
         setError(null);
       } catch (err) {
         if (!isMounted) return;
-        setError(err instanceof Error ? err.message : "Failed to fetch questions");
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch questions",
+        );
       } finally {
         if (!isMounted) return;
         setLoading(false);
@@ -391,7 +421,9 @@ export default function PracticePage() {
 
     return modules
       .filter((module) => {
-        const moduleText = normalizeText(`${module.title} ${module.description}`);
+        const moduleText = normalizeText(
+          `${module.title} ${module.description}`,
+        );
         return selectedTrack.moduleKeywords.some((keyword) =>
           moduleText.includes(normalizeText(keyword)),
         );
@@ -414,7 +446,9 @@ export default function PracticePage() {
 
     return questions.filter((question) => {
       const text = normalizeText(`${question.title} ${question.description}`);
-      return selectedTrack.keywords.some((keyword) => text.includes(normalizeText(keyword)));
+      return selectedTrack.keywords.some((keyword) =>
+        text.includes(normalizeText(keyword)),
+      );
     });
   }, [questions, selectedTrack, selectedTrackModuleIds]);
 
@@ -430,18 +464,25 @@ export default function PracticePage() {
 
     return questions.some((question) => {
       const text = normalizeText(`${question.title} ${question.description}`);
-      return selectedTrack.keywords.some((keyword) => text.includes(normalizeText(keyword)));
+      return selectedTrack.keywords.some((keyword) =>
+        text.includes(normalizeText(keyword)),
+      );
     });
   }, [questions, selectedTrack, selectedTrackModuleIds]);
 
   const selectedQuestion = useMemo(
-    () => filteredQuestions.find((question) => question.id === selectedQuestionId) || null,
+    () =>
+      filteredQuestions.find(
+        (question) => question.id === selectedQuestionId,
+      ) || null,
     [filteredQuestions, selectedQuestionId],
   );
 
   const nextQuestionId = useMemo(() => {
     if (!selectedQuestion) return null;
-    const currentIndex = filteredQuestions.findIndex((q) => q.id === selectedQuestion.id);
+    const currentIndex = filteredQuestions.findIndex(
+      (q) => q.id === selectedQuestion.id,
+    );
     if (currentIndex >= 0 && currentIndex < filteredQuestions.length - 1) {
       return filteredQuestions[currentIndex + 1].id;
     }
@@ -576,9 +617,13 @@ export default function PracticePage() {
           <div className="mx-auto max-w-2xl px-4 py-12 md:px-8">
             <Card className="border-red-400/30 bg-red-500/10">
               <CardHeader>
-                <CardTitle className="text-red-200">Could not load practice data</CardTitle>
+                <CardTitle className="text-red-200">
+                  Could not load practice data
+                </CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-red-100">{error}</CardContent>
+              <CardContent className="text-sm text-red-100">
+                {error}
+              </CardContent>
             </Card>
           </div>
         </div>
@@ -594,13 +639,16 @@ export default function PracticePage() {
           {!selectedTrack && (
             <>
               <section className="mb-10">
-                <p className="text-xs uppercase tracking-[0.22em] text-cyan-300/80">Practice Arena</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-cyan-300/80">
+                  Practice Arena
+                </p>
                 <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-50 md:text-5xl">
                   Learn DSA With Structured Tracks
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm text-slate-400 md:text-base">
-                  Choose a topic track. After selecting a track, you will see only coding questions
-                  related to that topic and can open each one in the coding interface.
+                  Choose a topic track. After selecting a track, you will see
+                  only coding questions related to that topic and can open each
+                  one in the coding interface.
                 </p>
               </section>
 
@@ -612,7 +660,9 @@ export default function PracticePage() {
                       key={track.id}
                       className={`group overflow-hidden rounded-2xl border bg-slate-950/85 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_40px_rgba(0,0,0,0.45)] ${track.borderClass} ${track.hoverClass}`}
                     >
-                      <div className={`h-24 bg-linear-to-r ${track.headerGradientClass}`}>
+                      <div
+                        className={`h-24 bg-linear-to-r ${track.headerGradientClass}`}
+                      >
                         <div className="flex h-full items-center justify-center">
                           <Icon className="h-8 w-8 text-slate-200/90" />
                         </div>
@@ -620,8 +670,13 @@ export default function PracticePage() {
 
                       <div className="space-y-3 p-4">
                         <div className="flex items-start justify-between gap-3">
-                          <h3 className="text-lg font-semibold text-slate-50">{track.title}</h3>
-                          <Badge variant="outline" className={levelStyles[track.level]}>
+                          <h3 className="text-lg font-semibold text-slate-50">
+                            {track.title}
+                          </h3>
+                          <Badge
+                            variant="outline"
+                            className={levelStyles[track.level]}
+                          >
                             {track.level}
                           </Badge>
                         </div>
@@ -659,9 +714,15 @@ export default function PracticePage() {
               </Button>
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
-                <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80">Selected Track</p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-100">{selectedTrack.title}</h2>
-                <p className="mt-2 text-sm text-slate-400">{selectedTrack.description}</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80">
+                  Selected Track
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-100">
+                  {selectedTrack.title}
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  {selectedTrack.description}
+                </p>
               </div>
 
               {!trackHasStrictMatches && (
@@ -674,10 +735,12 @@ export default function PracticePage() {
                 <Card className="border-slate-800 bg-slate-950/85">
                   <CardContent className="py-10 text-center">
                     <p className="text-sm text-slate-300">
-                      No questions found for <strong>{selectedTrack.title}</strong>.
+                      No questions found for{" "}
+                      <strong>{selectedTrack.title}</strong>.
                     </p>
                     <p className="mt-2 text-xs text-slate-500">
-                      Add topic-specific coding questions in related modules to populate this track.
+                      Add topic-specific coding questions in related modules to
+                      populate this track.
                     </p>
                   </CardContent>
                 </Card>
@@ -691,14 +754,21 @@ export default function PracticePage() {
                       <CardHeader className="space-y-3">
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-slate-500">Q{index + 1}</p>
-                          <Badge variant="outline" className="border-slate-700 text-slate-300">
+                          <Badge
+                            variant="outline"
+                            className="border-slate-700 text-slate-300"
+                          >
                             {question.difficulty}
                           </Badge>
                         </div>
-                        <CardTitle className="text-lg text-slate-100">{question.title}</CardTitle>
+                        <CardTitle className="text-lg text-slate-100">
+                          {question.title}
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="mb-4 line-clamp-2 text-sm text-slate-400">{question.description}</p>
+                        <p className="mb-4 line-clamp-2 text-sm text-slate-400">
+                          {question.description}
+                        </p>
                         <Button
                           className="w-full bg-cyan-600 text-white hover:bg-cyan-500"
                           onClick={() => handleOpenQuestion(question.id)}
@@ -724,7 +794,10 @@ export default function PracticePage() {
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Question List
                 </Button>
-                <Badge variant="outline" className="border-slate-700 text-slate-300">
+                <Badge
+                  variant="outline"
+                  className="border-slate-700 text-slate-300"
+                >
                   {selectedTrack.title}
                 </Badge>
               </div>
@@ -733,10 +806,17 @@ export default function PracticePage() {
                 <CardHeader>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <CardTitle className="text-2xl text-slate-100">{selectedQuestion.title}</CardTitle>
-                      <p className="mt-2 text-sm text-slate-400">{selectedQuestion.description}</p>
+                      <CardTitle className="text-2xl text-slate-100">
+                        {selectedQuestion.title}
+                      </CardTitle>
+                      <p className="mt-2 text-sm text-slate-400">
+                        {selectedQuestion.description}
+                      </p>
                     </div>
-                    <Badge variant="outline" className="border-slate-700 text-slate-300">
+                    <Badge
+                      variant="outline"
+                      className="border-slate-700 text-slate-300"
+                    >
                       {selectedQuestion.difficulty}
                     </Badge>
                   </div>
@@ -746,14 +826,18 @@ export default function PracticePage() {
                   <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
                     <div className="space-y-4 xl:col-span-2">
                       <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-                        <h4 className="text-sm font-semibold text-slate-100">Problem Details</h4>
+                        <h4 className="text-sm font-semibold text-slate-100">
+                          Problem Details
+                        </h4>
                         <p className="mt-2 text-sm leading-relaxed text-slate-400">
                           {selectedQuestion.description}
                         </p>
                       </div>
 
                       <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-                        <h4 className="mb-2 text-sm font-semibold text-slate-100">Visible Test Cases</h4>
+                        <h4 className="mb-2 text-sm font-semibold text-slate-100">
+                          Visible Test Cases
+                        </h4>
                         <div className="space-y-2">
                           {(selectedQuestion.codeChallenge?.testCases || [])
                             .filter((testCase) => testCase.visible !== false)
@@ -776,7 +860,9 @@ export default function PracticePage() {
 
                     <div className="space-y-3 xl:col-span-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-slate-200">Coding IDE</p>
+                        <p className="text-sm font-medium text-slate-200">
+                          Coding IDE
+                        </p>
                         <span className="text-xs text-slate-400">
                           Monaco + Judge0 Sandbox
                         </span>
@@ -786,7 +872,9 @@ export default function PracticePage() {
                         <MonacoEditor
                           key={selectedQuestion.id}
                           height="420px"
-                          language={getMonacoLanguage(selectedQuestion.codeChallenge?.language)}
+                          language={getMonacoLanguage(
+                            selectedQuestion.codeChallenge?.language,
+                          )}
                           theme="vs-dark"
                           value={codeAnswer}
                           onChange={(value) => {
@@ -817,8 +905,12 @@ export default function PracticePage() {
 
                   {!submitted && sandboxResult && (
                     <div className="rounded-lg border border-cyan-400/35 bg-cyan-500/10 p-4">
-                      <p className="mb-3 text-sm font-semibold text-cyan-200">Sandbox Preview</p>
-                      <SandboxResultsPanel codeExecutionResult={sandboxResult} />
+                      <p className="mb-3 text-sm font-semibold text-cyan-200">
+                        Sandbox Preview
+                      </p>
+                      <SandboxResultsPanel
+                        codeExecutionResult={sandboxResult}
+                      />
                     </div>
                   )}
 
@@ -843,8 +935,10 @@ export default function PracticePage() {
                       <p className="mb-3 text-sm text-slate-200">
                         Score earned: <strong>{result.score}</strong>
                       </p>
-                      <SandboxResultsPanel codeExecutionResult={result.codeExecutionResult} />
-                      
+                      <SandboxResultsPanel
+                        codeExecutionResult={result.codeExecutionResult}
+                      />
+
                       {result.isCorrect && nextQuestionId && (
                         <div className="mt-4 flex justify-end">
                           <Button
@@ -919,5 +1013,13 @@ export default function PracticePage() {
         </main>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function PracticePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#05070d]" />}>
+      <PracticePageContent />
+    </Suspense>
   );
 }

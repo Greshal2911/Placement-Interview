@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { load as loadTfjsFaceDetector } from "@tensorflow-models/face-detection/dist/tfjs/detector";
 import * as tf from "@tensorflow/tfjs-core";
@@ -75,7 +75,7 @@ function formatTime(seconds: number) {
   return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-export default function InterviewTestPage() {
+function InterviewTestPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -93,8 +93,11 @@ export default function InterviewTestPage() {
   const [isFinalized, setIsFinalized] = useState(false);
   const [finalScore, setFinalScore] = useState<number | null>(null);
   const [finalFeedback, setFinalFeedback] = useState<string>("");
-  const [faceMonitoring, setFaceMonitoring] = useState<"unsupported" | "active" | "idle">("idle");
-  const [faceDetectorEngine, setFaceDetectorEngine] = useState<FaceDetectorEngine | null>(null);
+  const [faceMonitoring, setFaceMonitoring] = useState<
+    "unsupported" | "active" | "idle"
+  >("idle");
+  const [faceDetectorEngine, setFaceDetectorEngine] =
+    useState<FaceDetectorEngine | null>(null);
   const [lastFaceCount, setLastFaceCount] = useState<number | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
@@ -127,7 +130,10 @@ export default function InterviewTestPage() {
 
   const currentQuestion = questions[currentQuestionIndex];
   const questionCount = Math.max(questions.length, 1);
-  const progressPercent = Math.min(100, Math.round(((currentQuestionIndex + 1) / questionCount) * 100));
+  const progressPercent = Math.min(
+    100,
+    Math.round(((currentQuestionIndex + 1) / questionCount) * 100),
+  );
 
   useEffect(() => {
     if (!interviewId || !moduleId) {
@@ -142,7 +148,11 @@ export default function InterviewTestPage() {
     }
 
     try {
-      const guard = JSON.parse(guardRaw) as { moduleId?: string; camera?: boolean; microphone?: boolean };
+      const guard = JSON.parse(guardRaw) as {
+        moduleId?: string;
+        camera?: boolean;
+        microphone?: boolean;
+      };
       if (!guard.camera || !guard.microphone || guard.moduleId !== moduleId) {
         router.replace(`/interview/rules?moduleId=${moduleId}`);
       }
@@ -210,13 +220,21 @@ export default function InterviewTestPage() {
           setFaceMonitoring("active");
 
           faceMonitorIntervalRef.current = window.setInterval(async () => {
-            if (isFinalized || autoCompletedByFaceRef.current || !cameraVideoRef.current) {
+            if (
+              isFinalized ||
+              autoCompletedByFaceRef.current ||
+              !cameraVideoRef.current
+            ) {
               return;
             }
 
             try {
               const video = cameraVideoRef.current;
-              if (!video || video.readyState < 2 || detectionInFlightRef.current) {
+              if (
+                !video ||
+                video.readyState < 2 ||
+                detectionInFlightRef.current
+              ) {
                 return;
               }
 
@@ -232,7 +250,9 @@ export default function InterviewTestPage() {
 
               if (faces.length > 1) {
                 autoCompletedByFaceRef.current = true;
-                setError("Multiple people detected in camera frame. Interview auto-submitted.");
+                setError(
+                  "Multiple people detected in camera frame. Interview auto-submitted.",
+                );
                 void finalizeInterview("MULTIPLE_FACES_DETECTED");
                 detectionInFlightRef.current = false;
                 return;
@@ -244,7 +264,9 @@ export default function InterviewTestPage() {
                   noFaceSinceRef.current = now;
                 } else if (now - noFaceSinceRef.current >= 2000) {
                   autoCompletedByFaceRef.current = true;
-                  setError("User not visible in camera for 2 seconds. Interview auto-submitted.");
+                  setError(
+                    "User not visible in camera for 2 seconds. Interview auto-submitted.",
+                  );
                   void finalizeInterview("USER_NOT_VISIBLE_2S");
                 }
               } else {
@@ -267,7 +289,11 @@ export default function InterviewTestPage() {
         setInterview(data);
         setQuestions(Array.isArray(data.qnaLog) ? data.qnaLog : []);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Failed to initialize interview");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Failed to initialize interview",
+        );
       } finally {
         setLoading(false);
       }
@@ -376,13 +402,23 @@ export default function InterviewTestPage() {
 
       if (payload.data.isComplete) {
         setIsFinalized(true);
-        setFinalScore(typeof payload.data.interview?.score === "number" ? payload.data.interview.score : 0);
-        setFinalFeedback(payload.data.interview?.feedback || "Interview completed.");
+        setFinalScore(
+          typeof payload.data.interview?.score === "number"
+            ? payload.data.interview.score
+            : 0,
+        );
+        setFinalFeedback(
+          payload.data.interview?.feedback || "Interview completed.",
+        );
       } else if (currentQuestionIndex < updatedQuestions.length - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
       }
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed to submit answer");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to submit answer",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -410,7 +446,9 @@ export default function InterviewTestPage() {
 
       const updatedInterview = payload.data as InterviewData;
       setIsFinalized(true);
-      setFinalScore(typeof updatedInterview.score === "number" ? updatedInterview.score : 0);
+      setFinalScore(
+        typeof updatedInterview.score === "number" ? updatedInterview.score : 0,
+      );
       setFinalFeedback(
         updatedInterview.feedback ||
           (reason === "TIME_LIMIT_REACHED"
@@ -419,14 +457,18 @@ export default function InterviewTestPage() {
               ? "Interview auto-submitted because multiple faces were detected."
               : reason === "USER_NOT_VISIBLE_2S"
                 ? "Interview auto-submitted because user was not visible for 2 seconds."
-            : "Interview completed."),
+                : "Interview completed."),
       );
       setInterview(updatedInterview);
       if (Array.isArray(updatedInterview.qnaLog)) {
         setQuestions(updatedInterview.qnaLog);
       }
     } catch (completeError) {
-      setError(completeError instanceof Error ? completeError.message : "Failed to complete interview");
+      setError(
+        completeError instanceof Error
+          ? completeError.message
+          : "Failed to complete interview",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -461,20 +503,31 @@ export default function InterviewTestPage() {
           <CardContent className="space-y-6">
             <div className="rounded-xl border border-border bg-card p-6 text-center">
               <p className="text-sm text-muted-foreground">Final AI Score</p>
-              <p className="mt-1 text-5xl font-bold text-foreground">{finalScore ?? 0}/10</p>
-              <p className="mt-3 text-sm text-muted-foreground">{finalFeedback}</p>
+              <p className="mt-1 text-5xl font-bold text-foreground">
+                {finalScore ?? 0}/10
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {finalFeedback}
+              </p>
             </div>
 
             <div className="space-y-3">
               {questions.map((question, index) => (
-                <div key={`${question.question}-${index}`} className="rounded-lg border border-border p-4">
-                  <p className="font-medium text-foreground">Q{index + 1}: {question.question}</p>
+                <div
+                  key={`${question.question}-${index}`}
+                  className="rounded-lg border border-border p-4"
+                >
+                  <p className="font-medium text-foreground">
+                    Q{index + 1}: {question.question}
+                  </p>
                   <p className="mt-2 text-sm text-muted-foreground">
                     Answer: {question.userResponse || "Not answered"}
                   </p>
                   {question.evaluation && (
                     <p className="mt-2 text-sm text-foreground">
-                      <Badge variant="secondary">Score: {question.evaluation.score}/10</Badge>
+                      <Badge variant="secondary">
+                        Score: {question.evaluation.score}/10
+                      </Badge>
                     </p>
                   )}
                 </div>
@@ -482,8 +535,15 @@ export default function InterviewTestPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Button onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
-              <Button variant="outline" onClick={() => router.push("/interview")}>Take Another Interview</Button>
+              <Button onClick={() => router.push("/dashboard")}>
+                Back to Dashboard
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/interview")}
+              >
+                Take Another Interview
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -491,8 +551,12 @@ export default function InterviewTestPage() {
         <div className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-primary/80">Step 3 of 3</p>
-              <h1 className="text-2xl font-bold text-foreground">{interview?.module?.title || "Interview"}</h1>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary/80">
+                Step 3 of 3
+              </p>
+              <h1 className="text-2xl font-bold text-foreground">
+                {interview?.module?.title || "Interview"}
+              </h1>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-1.5 text-amber-200">
@@ -526,7 +590,9 @@ export default function InterviewTestPage() {
 
           {error && (
             <Card className="border-red-400/50 bg-red-500/10">
-              <CardContent className="py-3 text-sm text-red-200">{error}</CardContent>
+              <CardContent className="py-3 text-sm text-red-200">
+                {error}
+              </CardContent>
             </Card>
           )}
 
@@ -547,8 +613,13 @@ export default function InterviewTestPage() {
               />
 
               <div className="flex flex-wrap gap-3">
-                <Button onClick={submitAnswer} disabled={!answer.trim() || submitting}>
-                  {submitting ? "Submitting..." : (
+                <Button
+                  onClick={submitAnswer}
+                  disabled={!answer.trim() || submitting}
+                >
+                  {submitting ? (
+                    "Submitting..."
+                  ) : (
                     <>
                       <Send className="mr-2 h-4 w-4" /> Submit Answer
                     </>
@@ -562,7 +633,9 @@ export default function InterviewTestPage() {
                       setAnswer("");
                     }
                   }}
-                  disabled={currentQuestionIndex >= questions.length - 1 || submitting}
+                  disabled={
+                    currentQuestionIndex >= questions.length - 1 || submitting
+                  }
                 >
                   Next Question
                 </Button>
@@ -605,5 +678,13 @@ export default function InterviewTestPage() {
         </div>
       )}
     </InterviewLayout>
+  );
+}
+
+export default function InterviewTestPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <InterviewTestPageContent />
+    </Suspense>
   );
 }

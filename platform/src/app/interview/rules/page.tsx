@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/shared/navbar";
 import { ProtectedRoute } from "@/components/shared/protected-route";
@@ -35,7 +35,7 @@ const InterviewLayout = ({ children }: { children: React.ReactNode }) => (
   </ProtectedRoute>
 );
 
-export default function InterviewRulesPage() {
+function InterviewRulesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -68,7 +68,11 @@ export default function InterviewRulesPage() {
         const payload = await res.json();
         setModuleData(payload.data);
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : "Failed to load module details");
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Failed to load module details",
+        );
       } finally {
         setPageLoading(false);
       }
@@ -89,7 +93,10 @@ export default function InterviewRulesPage() {
     setAudioStatus("requesting");
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
 
       streamRef.current = stream;
       setCameraStatus("granted");
@@ -113,7 +120,9 @@ export default function InterviewRulesPage() {
     }
 
     if (cameraStatus !== "granted" || audioStatus !== "granted") {
-      setErrorMessage("Camera and microphone must be active before continuing.");
+      setErrorMessage(
+        "Camera and microphone must be active before continuing.",
+      );
       return;
     }
 
@@ -147,9 +156,13 @@ export default function InterviewRulesPage() {
         }),
       );
 
-      router.push(`/interview/test?moduleId=${moduleId}&interviewId=${payload.data.interviewId}`);
+      router.push(
+        `/interview/test?moduleId=${moduleId}&interviewId=${payload.data.interviewId}`,
+      );
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Failed to start interview");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to start interview",
+      );
     } finally {
       setStartingInterview(false);
     }
@@ -175,17 +188,26 @@ export default function InterviewRulesPage() {
           <CardContent className="py-10 text-center text-muted-foreground">
             Invalid topic selection. Please choose a module again.
             <div className="mt-4">
-              <Button onClick={() => router.push("/interview")}>Back to Topic Selection</Button>
+              <Button onClick={() => router.push("/interview")}>
+                Back to Topic Selection
+              </Button>
             </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-primary/80">Step 2 of 3</p>
-            <h1 className="mt-2 text-3xl font-bold text-foreground">Interview Rules and Conditions</h1>
+            <p className="text-xs uppercase tracking-[0.2em] text-primary/80">
+              Step 2 of 3
+            </p>
+            <h1 className="mt-2 text-3xl font-bold text-foreground">
+              Interview Rules and Conditions
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Topic selected: <span className="font-semibold text-foreground">{moduleData.title}</span>
+              Topic selected:{" "}
+              <span className="font-semibold text-foreground">
+                {moduleData.title}
+              </span>
             </p>
           </div>
 
@@ -202,7 +224,9 @@ export default function InterviewRulesPage() {
                   <Camera className="h-4 w-4 text-primary" />
                   Camera detection must remain enabled throughout test.
                 </div>
-                <Badge variant={cameraStatus === "granted" ? "secondary" : "outline"}>
+                <Badge
+                  variant={cameraStatus === "granted" ? "secondary" : "outline"}
+                >
                   {cameraStatus}
                 </Badge>
               </div>
@@ -211,7 +235,9 @@ export default function InterviewRulesPage() {
                   <Mic className="h-4 w-4 text-primary" />
                   Audio detection must remain enabled throughout test.
                 </div>
-                <Badge variant={audioStatus === "granted" ? "secondary" : "outline"}>
+                <Badge
+                  variant={audioStatus === "granted" ? "secondary" : "outline"}
+                >
                   {audioStatus}
                 </Badge>
               </div>
@@ -236,7 +262,9 @@ export default function InterviewRulesPage() {
               type="button"
               variant="outline"
               onClick={requestMediaPermissions}
-              disabled={cameraStatus === "requesting" || audioStatus === "requesting"}
+              disabled={
+                cameraStatus === "requesting" || audioStatus === "requesting"
+              }
             >
               {cameraStatus === "requesting" || audioStatus === "requesting"
                 ? "Checking devices..."
@@ -255,18 +283,35 @@ export default function InterviewRulesPage() {
 
           {errorMessage && (
             <Card className="border-red-400/50 bg-red-500/10">
-              <CardContent className="py-3 text-sm text-red-200">{errorMessage}</CardContent>
+              <CardContent className="py-3 text-sm text-red-200">
+                {errorMessage}
+              </CardContent>
             </Card>
           )}
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={() => router.push("/interview")}>Back</Button>
-            <Button onClick={startInterview} disabled={!canContinue || startingInterview}>
-              {startingInterview ? "Starting interview..." : "Accept and Continue to Test"}
+            <Button variant="outline" onClick={() => router.push("/interview")}>
+              Back
+            </Button>
+            <Button
+              onClick={startInterview}
+              disabled={!canContinue || startingInterview}
+            >
+              {startingInterview
+                ? "Starting interview..."
+                : "Accept and Continue to Test"}
             </Button>
           </div>
         </div>
       )}
     </InterviewLayout>
+  );
+}
+
+export default function InterviewRulesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <InterviewRulesPageContent />
+    </Suspense>
   );
 }

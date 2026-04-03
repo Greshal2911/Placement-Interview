@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -16,7 +16,7 @@ import { useAuth } from "@/lib/auth-context";
 import { validateLoginForm, ValidationError } from "@/lib/validation";
 import { BookOpen, Loader, AlertCircle } from "lucide-react";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
@@ -68,7 +68,9 @@ export default function LoginPage() {
         {/* Card */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl text-foreground">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl text-foreground">
+              Welcome Back
+            </CardTitle>
             <CardDescription className="text-muted-foreground">
               Sign in to continue your learning journey
             </CardDescription>
@@ -98,7 +100,9 @@ export default function LoginPage() {
                   disabled={loading}
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive mt-1">{errors.email}</p>
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
@@ -126,7 +130,9 @@ export default function LoginPage() {
                   </Button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-destructive mt-1">{errors.password}</p>
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.password}
+                  </p>
                 )}
               </div>
 
@@ -161,7 +167,13 @@ export default function LoginPage() {
             </div>
 
             {/* Register Link */}
-            <Link href="/auth/register" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+            <Link
+              href="/auth/register"
+              className={buttonVariants({
+                variant: "outline",
+                className: "w-full",
+              })}
+            >
               Create Account
             </Link>
           </CardContent>
@@ -183,5 +195,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
